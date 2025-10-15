@@ -1,0 +1,7 @@
+# Scout94 Visual Testing Requirements
+# Python 3.13 compatible versions
+playwright==1.48.0
+pytest-playwright==0.5.2
+Pillow==10.4.0
+openai==1.54.3
+python-dotenv==1.0.1

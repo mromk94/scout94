@@ -1,0 +1,49 @@
+# Environment and API keys (CRITICAL - DO NOT COMMIT)
+.env
+
+# Python Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Logs
+*.log
+.scout94.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Test outputs
+test_output_*.txt
+
+# Screenshots (can be large)
+.scout94_screenshots/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Playwright
+playwright-report/
+test-results/
+
+# Backup files
+*.bak
+*.backup

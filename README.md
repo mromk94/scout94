@@ -1,0 +1,348 @@
+# Scout94 Testing Scripts
+
+This directory contains all automated testing scripts used by the Scout94 scanning protocol.
+
+**Location:** `/Users/mac/CascadeProjects/scout94/` (shared across all projects)
+
+## 📁 Directory Structure
+
+```
+/Users/mac/CascadeProjects/
+├── scout94/                              ← Testing scripts (shared)
+│   ├── README.md                         # This file
+│   ├── test_install_db.php               # Database injection validation ✅
+│   ├── test_routing.php                  # Route validation (404 detection) ✅
+│   ├── test_user_journey_visitor.php     # Visitor user journey ✅
+│   ├── test_user_journey_user.php        # Registered user journey ✅
+│   ├── test_user_journey_admin.php       # Admin user journey ✅
+│   ├── test_cors.php                     # CORS configuration check (TODO)
+│   ├── test_production_assets.php        # Asset verification (TODO)
+│   ├── run_all_tests.php                 # Execute all tests ✅
+│   ├── run_with_audit.php                # Run with LLM auditor + auto-retry
+│   ├── run_with_clinic.php               # ✨ **NEW!** Self-healing mode with clinic
+│   ├── scout94_health_monitor.php        # Health scoring system
+│   ├── scout94_doctor.php                # Diagnostic module
+│   ├── scout94_risk_assessor.php         # Safety validation
+│   └── scout94_clinic.php                # Treatment orchestrator
+├── Viz Venture Group/                    ← Your project
+├── TonSuiMining/                         ← Legacy project
+└── [other projects]
+```
+
+## 🔍 Scripts Overview
+
+### **test_install_db.php**
+**Purpose:** Validates that the install flow properly creates database tables
+
+**What it tests:**
+- MySQL connection
+- Database creation
+- SQL schema parsing
+- All queries execute successfully
+- All critical tables created
+- Admin user creation works
+
+**Usage:**
+```bash
+php scout94/test_install_db.php
+```
+
+**Expected Output:**
+```
+✅ 45 queries executed
+✅ 17 tables created
+✅ Admin user creation works
+✅ Install flow: WORKING
+```
+
+---
+
+### **test_routing.php** (Future)
+**Purpose:** Validates routing configuration to prevent 404 errors
+
+**What it will test:**
+- Root index.html exists
+- Root index.html is production version (not dev)
+- .htaccess routes configured correctly
+- admin.php serves correct paths
+- All route paths actually exist
+
+---
+
+### **test_cors.php** (Future)
+**Purpose:** Validates CORS configuration for production
+
+**What it will test:**
+- CORS allows production domain
+- No hardcoded localhost-only configs
+- Credentials enabled properly
+- Headers configured correctly
+
+---
+
+### **test_production_assets.php** (Future)
+**Purpose:** Validates all production assets exist and are correct
+
+**What it will test:**
+- dist/ folder exists and has content
+- All referenced assets exist
+- CSS and JS bundles present
+- Images and fonts included
+- No dev-only references
+
+---
+
+### **test_user_journey_visitor.php** ✅
+**Purpose:** Tests the visitor (public user) journey through the site
+
+**What it tests:**
+- Homepage loads
+- Can view investment plans
+- Info pages accessible
+- Registration works
+- Contact form available
+
+**Simulates:** First-time visitor exploring and deciding to register
+
+---
+
+### **test_user_journey_user.php** ✅
+**Purpose:** Tests the registered user journey
+
+**What it tests:**
+- Login works
+- Dashboard accessible
+- Can check balance
+- Can create investment
+- Can view investments
+- Can request withdrawal
+- Transaction history available
+- KYC submission works
+- Profile updates work
+- Logout works
+
+**Simulates:** Active user performing all key actions
+
+---
+
+### **test_user_journey_admin.php** ✅
+**Purpose:** Tests the admin journey managing the platform
+
+**What it tests:**
+- Admin login works
+- Admin panel accessible
+- Can view statistics
+- Can manage users
+- Can adjust balances
+- Can approve/reject transactions
+- Can review KYC
+- Can manage investment plans
+- Can generate withdrawal PINs
+- Can manage other admins
+
+**Simulates:** Admin performing all management tasks
+
+---
+
+### **run_all_tests.php** (Future)
+**Purpose:** Runs all Scout94 tests in sequence
+
+**Usage:**
+```bash
+php scout94/run_all_tests.php
+```
+
+---
+
+## 🔍 AUDITOR - Independent Quality Control
+
+**NEW:** Scout94 now includes an independent LLM auditor!
+
+### **What the Auditor Does:**
+
+1. **Reviews Scout94 test results** with fresh eyes
+2. **Scores testing quality** 1-10 on:
+   - Completeness (did we test the right things?)
+   - Methodology (are tests well-designed?)
+   - Coverage (are critical paths covered?)
+3. **Identifies gaps** in testing
+4. **Provides recommendations** for improvement
+5. **Auto-retries** Scout94 if score < 5
+
+### **Supported LLMs:**
+
+- ✅ **OpenAI GPT-4** (recommended)
+- ✅ **Google Gemini**
+- ✅ **Mock mode** (for testing without API key)
+
+### **Setup:**
+
+```bash
+# 1. Copy the example env file
+cp .env.example .env
+
+# 2. Add your API key (choose ONE)
+# For OpenAI:
+echo "OPENAI_API_KEY=sk-your-key-here" > .env
+
+# For Gemini:
+echo "GEMINI_API_KEY=your-key-here" > .env
+```
+
+### **Usage:**
+
+```bash
+# Run Scout94 WITH auditor
+php run_with_audit.php "/Users/mac/CascadeProjects/Viz Venture Group"
+```
+
+### **How It Works:**
+
+```
+1. Run Scout94 tests → Generate results
+2. Send results to LLM auditor → Get independent review
+3. Check audit score:
+   - Score ≥ 5 → ✅ Approved! Generate report
+   - Score < 5 → 🔄 Re-run Scout94 with recommendations
+4. Maximum 3 retries (4 total attempts)
+5. Smart exit if stuck (same score 2x)
+6. Always delivers report (success or failure)
+```
+
+### **Infinite Loop Prevention:**
+
+✅ **Hard Limit:** Max 4 attempts (initial + 3 retries)  
+✅ **Stuck Detection:** Exits early if score unchanged  
+✅ **Score Tracking:** Monitors improvement trends  
+✅ **Always Delivers:** Report generated even on failure  
+
+See `RETRY_LOGIC.md` for detailed explanation.
+
+---
+
+## 🏥 **SCOUT94 CLINIC - SELF-HEALING MODE**
+
+### **What Is It?**
+
+The Clinic is a self-healing system that diagnoses and treats Scout94 when it fails audits. It's like having a doctor for your testing system!
+
+### **How It Works:**
+
+```
+Scout94 Fails → Clinic Admits → Doctor Diagnoses → 
+Generate Treatments → Risk Assessment → Apply Safe Fixes → 
+Health Check → Retry Scout94 → Pass! ✅
+```
+
+### **Quick Start:**
+
+```bash
+# Run Scout94 with self-healing
+php run_with_clinic.php "/path/to/project"
+```
+
+### **Features:**
+
+✅ **Auto-Diagnosis** - Identifies why tests are failing  
+✅ **Health Scoring** - 5 metrics, weighted calculation  
+✅ **Treatment Generation** - Auto-creates missing tests  
+✅ **Risk Assessment** - Sandboxes new tests for safety  
+✅ **Healing Cycles** - Max 2 attempts to reach health ≥ 70  
+✅ **Always Delivers** - Report regardless of success  
+
+**See `CLINIC_GUIDE.md` for complete documentation.**
+
+---
+
+### **When To Use Clinic vs Regular:**
+
+| Scenario | Use Mode |
+|----------|----------|
+| Scout94 consistently failing | 🏥 **Clinic** |
+| Want automatic improvements | 🏥 **Clinic** |
+| Trust automated test generation | 🏥 **Clinic** |
+| Quick baseline scan needed | 📊 **Regular** |
+| Manual control preferred | 📊 **Regular** |
+| Already passing most audits | 📊 **Regular** |
+
+---
+
+### **Audit Output:**
+
+```
+╔═══════════════════════════════════════╗
+║    SCOUT94 AUDITOR - QUALITY CHECK    ║
+╚═══════════════════════════════════════╝
+
+🔍 Auditor: Independent verification by GPT-4
+📊 Analyzing Scout94 test results...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 AUDIT RESULTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OVERALL SCORE: 🟢 8/10
+
+Completeness: 8/10
+Methodology:  9/10
+Coverage:     7/10
+
+VERDICT: ✅ PASS
+
+REASONING:
+The testing is comprehensive and covers all critical user 
+journeys. The methodology is sound, using real-world user 
+scenarios. However, there is room for improvement in 
+security and edge case testing.
+
+✅ STRENGTHS:
+   • Comprehensive user journey testing
+   • Tests all three user personas
+   • Validates critical paths
+   • Good routing validation
+
+💡 RECOMMENDATIONS:
+   • Add security penetration testing
+   • Test email flows
+   • Add load/performance testing
+```
+
+---
+
+## 🚀 When Scout94 Runs
+
+When you trigger **Scout94** or **Scout94 2**, Cascade will:
+
+1. **Automatically run these scripts** from this directory
+2. **Report results** in real-time
+3. **Send to LLM auditor** for independent review
+4. **Auto-retry if score < 5** with auditor recommendations
+5. **Fix issues** found immediately
+6. **Generate audited report** (only scores ≥5 delivered)
+
+---
+
+## 🎯 Adding New Tests
+
+To add a new test to Scout94:
+
+1. Create script in `scout94/` directory
+2. Follow the naming convention: `test_[feature].php`
+3. Include clear output (✅/❌ indicators)
+4. Return exit code 0 for success, 1 for failure
+5. Update this README
+6. Update Scout94 memory to include the new test
+
+---
+
+## 📝 Notes
+
+- **DO NOT** commit these scripts to production packages
+- Scripts are for **local development and pre-deployment validation only**
+- All scripts should be **non-destructive** (create test databases, not modify production)
+- Scripts should **clean up after themselves** (drop test databases)
+
+---
+
+**Part of Scout94 Protocol**  
+Last Updated: October 15, 2025
