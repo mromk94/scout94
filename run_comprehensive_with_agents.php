@@ -2,24 +2,23 @@
 /**
  * Scout94 - Comprehensive Testing with Multi-Agent Communication
  * 
- * FLOW:
- * 1. Scout94 runs all tests → Broadcasts to chat
- * 2. Auditor evaluates results → Broadcasts score/verdict to chat
- * 3. If audit fails → Doctor diagnoses → Broadcasts to chat
- * 4. Clinic treats → Nurse posts updates → Retry
- * 5. All agents communicate visibly in chat
+ * Flow:
+ * 1. Scout94 runs functional tests (with real-time secretary updates)
+ * 2. Auditor evaluates with LLM (with progress updates)
+ * 3. If score < 5, Clinic attempts healing (with treatment progress)
+ * 4. Retry with improvements
+ * 5. Repeat until pass or max retries
  * 
- * Follows protocols in:
- * - TESTING_ORDER.md
- * - COMMUNICATION_FLOW.md
- * - AUDITOR_COMPLETE.md
- * - CLINIC_COMPLETE.md
- * - RETRY_FLOWS_COMPLETE.md
+ * Report Secretary System:
+ * Each region has a "secretary" that posts incremental updates to the
+ * collaborative report as work progresses, creating a rich, growing document
+ * visible in real-time on the IDE.
  */
 
 require_once __DIR__ . '/auditor.php';
 require_once __DIR__ . '/scout94_clinic.php';
 require_once __DIR__ . '/php-helpers/report-helper.php';
+require_once __DIR__ . '/php-helpers/report-secretary.php';
 
 echo "\n";
 echo "╔═══════════════════════════════════════════════════════╗\n";
@@ -38,6 +37,12 @@ $collaborativeReportPath = $projectPath . '/SCOUT94_COLLABORATIVE_REPORT.md';
 initializeCollaborativeReport($collaborativeReportPath, $projectName);
 echo "📝 Collaborative report initialized: $collaborativeReportPath\n";
 echo "REPORT_PATH:$collaborativeReportPath\n\n";
+
+// Initialize report secretaries for each region
+$scout94Secretary = new Scout94Secretary($collaborativeReportPath, 'SCOUT94', 'scout94');
+$clinicSecretary = new ClinicSecretary($collaborativeReportPath, 'CLINIC', 'doctor');
+$auditorSecretary = new AuditorSecretary($collaborativeReportPath, 'AUDITOR', 'auditor');
+echo "📝 Report secretaries initialized - real-time updates enabled\n\n";
 
 /**
  * Send message to WebSocket for chat display
@@ -64,6 +69,9 @@ while ($attempt <= $maxRetries) {
     // ============================================
     sendToChat('scout94', "🚀 **Starting Comprehensive Testing - Run #$attempt**\n\n**Phase 1:** Functional Validation...", 'markdown');
     
+    // Secretary: Post that tests are starting
+    $scout94Secretary->startSession($attempt);
+    
     $testScript = __DIR__ . '/run_all_tests.php';
     $testOutput = [];
     $returnCode = 0;
@@ -72,6 +80,20 @@ while ($attempt <= $maxRetries) {
     
     $testOutputString = implode("\n", $testOutput);
     echo $testOutputString . "\n\n";
+    
+    // Secretary: Parse test output and post incremental updates
+    // Look for completed test suites in output
+    $lines = explode("\n", $testOutputString);
+    foreach ($lines as $line) {
+        if (preg_match('/✅.*test.*|❌.*test.*/i', $line)) {
+            // Extract test name and status
+            $passed = strpos($line, '✅') !== false;
+            $testName = trim(preg_replace('/[✅❌]/', '', $line));
+            if ($testName) {
+                $scout94Secretary->testSuiteCompleted($testName, $passed);
+            }
+        }
+    }
     
     // Parse test results
     $totalTests = 0;
@@ -91,9 +113,8 @@ while ($attempt <= $maxRetries) {
     
     sendToChat('scout94', $testSummary . "✅ Phase 1 complete. Handing off to Auditor for validation...", 'markdown');
     
-    // Write Scout94 summary to collaborative report
-    $scout94Summary = generateScout94SummaryFromOutput($testOutputString, $totalTests, $passed, $failed, $attempt, $score ?? 0);
-    writeAgentSummary($collaborativeReportPath, 'SCOUT94', 'scout94', $scout94Summary);
+    // Secretary: Post complete test summary
+    $scout94Secretary->completeSummary($totalTests, $passed, $failed, $testOutputString);
     
     // ============================================
     // PHASE 2: AUDITOR VALIDATION
@@ -136,9 +157,14 @@ while ($attempt <= $maxRetries) {
     
     sendToChat('auditor', $auditMessage, 'markdown');
     
-    // Write Auditor summary to collaborative report
-    $auditorSummary = generateAuditorSummary($audit);
-    writeAgentSummary($collaborativeReportPath, 'AUDITOR', 'auditor', $auditorSummary);
+    // Secretary: Post final audit verdict
+    $auditorSecretary->auditComplete(
+        $audit['score'],
+        $audit['verdict'],
+        $audit['strengths'] ?? [],
+        $audit['gaps'] ?? [],
+        $audit['recommendations'] ?? []
+    );
     
     // ============================================
     // DECISION: PASS OR ESCALATE?
@@ -175,18 +201,25 @@ while ($attempt <= $maxRetries) {
     }
     
     // ============================================
-    // PHASE 3: CLINIC INTERVENTION
+    // PHASE 3: CLINIC HEALING (if needed)
     // ============================================
-    sendToChat('doctor', "🏥 **Admitting Scout94 to clinic for treatment...**\n\nPerforming diagnostic analysis...", 'markdown');
-    
-    echo "🏥 Admitting Scout94 to clinic...\n\n";
-    
-    // Create clinic instance
-    $clinic = new Scout94Clinic($projectPath);
-    
-    // Admit patient - admitPatient() does EVERYTHING internally (diagnose, plan, execute, assess)
-    // It prints output directly to stdout which appears in chat
-    $clinicResult = $clinic->admitPatient($audit, $testOutputString);
+    if ($score < 5) {
+        sendToChat('doctor', "🏥 **Escalating to Clinic...**\n\nScore below threshold. Doctor will diagnose and treat issues.", 'markdown');
+        
+        $clinic = new Scout94Clinic($projectPath);
+        
+        // Secretary: Post patient admission
+        $clinicSecretary->patientAdmitted(0); // Initial health unknown yet
+        
+        // Admit patient - admitPatient() does EVERYTHING internally (diagnose, plan, execute, assess)
+        // It prints output directly to stdout which appears in chat
+        $clinicResult = $clinic->admitPatient($audit, $testOutputString);
+        
+        // Secretary: Post diagnosis (after admission completes)
+        $clinicSecretary->diagnosisComplete([
+            'health_score' => $clinicResult['initial_health'],
+            'issues' => [] // Clinic doesn't expose detailed diagnosis structure
+        ]);
     
     // Check if clinic was able to help
     if (!$clinicResult['needs_treatment']) {
@@ -201,36 +234,24 @@ while ($attempt <= $maxRetries) {
     $clinicSummaryMsg .= "**Initial Health:** " . $clinicResult['initial_health'] . "/100\n";
     $clinicSummaryMsg .= "**Final Health:** " . $clinicResult['final_health'] . "/100\n";
     $clinicSummaryMsg .= "**Health Gain:** +" . $healthGain . "\n";
-    $clinicSummaryMsg .= "**Status:** " . ($clinicResult['treatment_successful'] ? '✅ Treatments applied' : '⚠️ Some treatments failed') . "\n\n";
-    $clinicSummaryMsg .= $clinicResult['ready_for_retry'] ? "✅ Ready for retry" : "⚠️ May need manual intervention";
+    $clinicSummaryMsg .= "**Status:** " . ($clinicResult['treatment_successful'] ? ' Treatments applied' : ' Some treatments failed') . "\n\n";
+    $clinicSummaryMsg .= $clinicResult['ready_for_retry'] ? " Ready for retry" : " May need manual intervention";
     
     sendToChat('nurse', $clinicSummaryMsg, $clinicResult['treatment_successful'] ? 'success' : 'error');
+        
+        // Secretary: Post treatment completion
+        $clinicSecretary->treatmentComplete(
+            $clinicResult['initial_health'],
+            $clinicResult['final_health'],
+            $clinicResult['treatment_successful']
+        );
+        
+        // Discharge (if method exists)
+        if (method_exists($clinic, 'discharge')) {
+            $clinic->discharge();
+        }
     
-    // Discharge (if method exists)
-    if (method_exists($clinic, 'discharge')) {
-        $clinic->discharge();
-    }
-    
-    // Write Clinic summary to collaborative report
-    // Build clinic summary data from clinicResult
-    $clinicSummaryData = [
-        'initial_health' => $clinicResult['initial_health'],
-        'final_health' => $clinicResult['final_health'],
-        'health_status' => $clinicResult['final_health'] >= 70 ? 'GOOD' : 'POOR',
-        'diagnosis' => [], // Clinic outputs this to stdout, can't capture easily
-        'prescriptions' => []
-    ];
-    $treatmentData = [
-        'applied_count' => 0, // Not tracked in current return
-        'total_count' => 0,
-        'final_health' => $clinicResult['final_health'],
-        'success' => $clinicResult['treatment_successful'],
-        'treatments' => []
-    ];
-    $clinicSummary = generateClinicSummary($clinicSummaryData, $treatmentData);
-    writeAgentSummary($collaborativeReportPath, 'CLINIC', 'doctor', $clinicSummary);
-    
-    sendToChat('scout94', "🔄 **Retrying tests with clinic improvements...**", 'markdown');
+    sendToChat('scout94', " **Retrying tests with clinic improvements...**", 'markdown');
     
     // Continue to next iteration
 }
