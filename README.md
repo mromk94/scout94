@@ -305,11 +305,14 @@ security and edge case testing.
    • Add security penetration testing
    • Test email flows
    • Add load/performance testing
-```
+   • Implement rate limiting
+   • Use a WAF for added security
+
+See `RETRY_LOGIC.md` for detailed explanation.
 
 ---
 
-## 🚀 When Scout94 Runs
+##  When Scout94 Runs
 
 When you trigger **Scout94** or **Scout94 2**, Cascade will:
 
@@ -322,7 +325,7 @@ When you trigger **Scout94** or **Scout94 2**, Cascade will:
 
 ---
 
-## 🎯 Adding New Tests
+##  Adding New Tests
 
 To add a new test to Scout94:
 
@@ -335,7 +338,7 @@ To add a new test to Scout94:
 
 ---
 
-## 📝 Notes
+##  Notes
 
 - **DO NOT** commit these scripts to production packages
 - Scripts are for **local development and pre-deployment validation only**
