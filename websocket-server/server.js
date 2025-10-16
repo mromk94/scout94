@@ -6,6 +6,10 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { handleAIConversation } from './ai-agent.js';
 import { handleComprehensiveScan } from './comprehensive-scan-command.js';
+import { ReportLockManager } from './report-lock-manager.js';
+import { ReportWriter } from './report-writer.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = 8094;
@@ -32,6 +36,10 @@ Agents online: 🚀 🩺 📊 📸 ⚙️ 🎨 💉
 // Track connected clients and running processes
 const clients = new Set();
 const runningProcesses = new Map();
+
+// Initialize collaborative reporting system
+const reportLockManager = new ReportLockManager();
+const reportWriter = new ReportWriter(reportLockManager);
 
 // Graceful shutdown handling
 let isShuttingDown = false;
@@ -167,26 +175,35 @@ async function handleRealTestRun(command, ws) {
   });
 
   // Determine which PHP script to run based on command
-  let scriptPath = '';
   const projectPath = '/Users/mac/CascadeProjects/Viz Venture Group';
-
-  if (command.includes('All') || command.includes('routing')) {
-    scriptPath = join(projectPath, 'tests', 'test_routing.php');
+  const scout94Dir = '/Users/mac/CascadeProjects/scout94';
+  
+  // Map commands to Scout94's test scripts (NOT in project directory)
+  let scriptPath;
+  if (command.includes('All')) {
+    // Use comprehensive multi-agent testing (auditor + clinic flow)
+    scriptPath = join(scout94Dir, 'run_comprehensive_with_agents.php');
+  } else if (command.includes('routing')) {
+    scriptPath = join(scout94Dir, 'test_routing.php');
   } else if (command.includes('install') || command.includes('database')) {
-    scriptPath = join(projectPath, 'tests', 'test_install_db.php');
+    scriptPath = join(scout94Dir, 'test_install_db.php');
   } else if (command.includes('visitor') || command.includes('Visitor')) {
-    scriptPath = join(projectPath, 'tests', 'test_user_journey_visitor.php');
+    scriptPath = join(scout94Dir, 'test_user_journey_visitor.php');
   } else if (command.includes('user') || command.includes('User')) {
-    scriptPath = join(projectPath, 'tests', 'test_user_journey_user.php');
+    scriptPath = join(scout94Dir, 'test_user_journey_user.php');
+  } else if (command.includes('admin') || command.includes('Admin')) {
+    scriptPath = join(scout94Dir, 'test_user_journey_admin.php');
+  } else if (command.includes('audit') || command.includes('Audit')) {
+    scriptPath = join(scout94Dir, 'run_with_audit.php');
   } else {
-    scriptPath = join(projectPath, 'tests', 'test_routing.php'); // default
+    scriptPath = join(scout94Dir, 'run_all_tests.php'); // default
   }
 
   if (!existsSync(scriptPath)) {
     broadcast({
       type: 'message',
       agent: 'scout94',
-      text: `❌ Test script not found: ${scriptPath}`,
+      text: `❌ Test script not found: ${scriptPath}\n\n**Expected location:** Scout94 tests should be in ${scout94Dir}`,
       timestamp: new Date().toISOString()
     });
     return;
@@ -207,6 +224,139 @@ async function handleRealTestRun(command, ws) {
   phpProcess.stdout.on('data', (data) => {
     const output = data.toString();
     console.log('PHP OUTPUT:', output);
+    
+    // Check for collaborative report lock requests
+    const lockRequest = output.match(/REPORT_LOCK_REQUEST:(.+)/);
+    if (lockRequest) {
+      try {
+        const { reportPath, agentId } = JSON.parse(lockRequest[1].trim());
+        console.log(`🔒 ${agentId} requesting report lock for ${reportPath}`);
+        
+        // Acquire lock (async)
+        reportLockManager.acquireLock(reportPath, agentId)
+          .then(() => {
+            console.log(`✅ Lock granted to ${agentId}`);
+            // PHP will proceed when it sees LOCK_GRANTED in output
+          })
+          .catch(error => {
+            console.error(`❌ Lock acquisition failed for ${agentId}:`, error);
+          });
+        
+        return; // Don't broadcast
+      } catch (e) {
+        console.error('Failed to parse lock request:', e);
+      }
+    }
+    
+    // Check for report write requests
+    const writeRequest = output.match(/REPORT_WRITE:(.+)/);
+    if (writeRequest) {
+      try {
+        const { reportPath, region, agentId, summary } = JSON.parse(writeRequest[1].trim());
+        console.log(`📝 ${agentId} writing to ${region} region`);
+        
+        // Write to region (async)
+        reportWriter.appendToRegion(reportPath, region, agentId, summary)
+          .then((newContent) => {
+            console.log(`✅ ${agentId} successfully wrote to ${region}`);
+            
+            // Broadcast file changed event for IDE live update
+            broadcast({
+              type: 'file_content_updated',
+              filePath: reportPath,
+              content: newContent,
+              updatedBy: agentId,
+              region: region,
+              timestamp: new Date().toISOString()
+            });
+            
+            // Notify agent in chat
+            broadcast({
+              type: 'message',
+              agent: agentId,
+              text: `✅ Added my analysis to the ${region} section of the report`,
+              timestamp: new Date().toISOString()
+            });
+          })
+          .catch(error => {
+            console.error(`❌ Write failed for ${agentId}:`, error);
+          });
+        
+        return; // Don't broadcast raw signal
+      } catch (e) {
+        console.error('Failed to parse write request:', e);
+      }
+    }
+    
+    // Check for report lock release
+    const lockRelease = output.match(/REPORT_LOCK_RELEASE:(.+)/);
+    if (lockRelease) {
+      try {
+        const { reportPath, agentId } = JSON.parse(lockRelease[1].trim());
+        reportLockManager.releaseLock(reportPath, agentId);
+        return;
+      } catch (e) {
+        console.error('Failed to parse lock release:', e);
+      }
+    }
+    
+    // Check for multi-agent messages
+    const agentMessage = output.match(/AGENT_MESSAGE:(.+)/);
+    if (agentMessage) {
+      try {
+        const messageData = JSON.parse(agentMessage[1].trim());
+        console.log(`💬 Agent message from ${messageData.agent}:`, messageData.text.substring(0, 50) + '...');
+        
+        // Broadcast agent message to all clients
+        broadcast({
+          type: 'message',
+          agent: messageData.agent,
+          text: messageData.text,
+          contentType: messageData.type === 'markdown' ? 'markdown' : 'text',
+          messageType: messageData.type, // success, error, markdown
+          timestamp: messageData.timestamp || new Date().toISOString()
+        });
+        
+        return; // Don't broadcast the raw signal
+      } catch (e) {
+        console.error('Failed to parse agent message:', e);
+      }
+    }
+    
+    // Check for comprehensive scan trigger
+    const scanTrigger = output.match(/TRIGGER_COMPREHENSIVE_SCAN:(.+)/);
+    if (scanTrigger) {
+      const targetProject = scanTrigger[1].trim();
+      console.log('🔍 Triggering comprehensive scan for:', targetProject);
+      
+      // Run comprehensive scan asynchronously
+      handleComprehensiveScan(ws, broadcast).catch(error => {
+        console.error('Comprehensive scan error:', error);
+        broadcast({
+          type: 'message',
+          agent: 'scout94',
+          text: `❌ Comprehensive scan failed: ${error.message}`,
+          timestamp: new Date().toISOString()
+        });
+      });
+      
+      return; // Don't broadcast the trigger signal
+    }
+    
+    // Check for report path in output
+    const reportMatch = output.match(/REPORT_PATH:(.+)/);
+    if (reportMatch) {
+      const reportPath = reportMatch[1].trim();
+      console.log('📄 Report generated:', reportPath);
+      
+      // Send open_file message to auto-open report
+      broadcast({
+        type: 'open_file',
+        filePath: reportPath,
+        agent: 'scout94',
+        timestamp: new Date().toISOString()
+      });
+    }
     
     broadcast({
       type: 'message',

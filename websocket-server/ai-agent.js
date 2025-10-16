@@ -6,6 +6,19 @@
 import * as AnalysisEngine from './analysis-engine.js';
 import { DecisionValidator, ProperSolutionFramework, DECISION_RULES, DuplicateAnalyzer, DuplicateResolver } from './decision-framework.js';
 
+// Import accountability protocol
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Load accountability system prompt (MANDATORY for all LLMs)
+const ACCOUNTABILITY_SYSTEM_PROMPT = readFileSync(
+  join(__dirname, 'ACCOUNTABILITY_SYSTEM_PROMPT.md'),
+  'utf-8'
+);
+
 // Project knowledge base - actual paths and structure
 const PROJECT_KNOWLEDGE = {
   projectPath: '/Users/mac/CascadeProjects/Viz Venture Group',

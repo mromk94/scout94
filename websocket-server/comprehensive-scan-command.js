@@ -21,6 +21,7 @@ export async function handleComprehensiveScan(ws, broadcast) {
     type: 'message',
     agent: 'scout94',
     text: '🔍 **Starting Intelligent Comprehensive Analysis...**\n\n**Phase 1:** Building holistic project understanding...\n**Phase 2:** Tracing root causes...\n**Phase 3:** Generating actionable report...\n\nThis will take a moment...',
+    contentType: 'markdown',
     timestamp: new Date().toISOString()
   });
 
@@ -195,10 +196,12 @@ export async function handleComprehensiveScan(ws, broadcast) {
       report += `✅ **No critical issues found!** System is healthy.`;
     }
 
+    // Send summary to chat as markdown
     broadcast({
       type: 'message',
       agent: 'scout94',
       text: report,
+      contentType: 'markdown',
       timestamp: new Date().toISOString()
     });
 
@@ -219,11 +222,9 @@ export async function handleComprehensiveScan(ws, broadcast) {
     const reportPath = MarkdownReportGenerator.saveReport(markdown, results.projectPath);
     
     // Save JSON backup
-    const fs = require('fs');
-    const path = require('path');
-    const reportDir = path.join(results.projectPath, 'test-reports');
-    const jsonPath = path.join(reportDir, `scan-data-${Date.now()}.json`);
-    fs.writeFileSync(jsonPath, JSON.stringify(results, null, 2));
+    const reportDir = join(results.projectPath, 'test-reports');
+    const jsonPath = join(reportDir, `scan-data-${Date.now()}.json`);
+    writeFileSync(jsonPath, JSON.stringify(results, null, 2));
     
     // Send special command to auto-open report in IDE
     broadcast({

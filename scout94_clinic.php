@@ -84,32 +84,43 @@ class Scout94Clinic {
     }
     
     private function createTreatmentPlan($prescriptions) {
-        echo "💊 Creating treatment plan...\n\n";
+        // Send to chat as doctor creating treatment plan
+        $planMsg = "## 💊 Treatment Plan\n\n";
         
         foreach ($prescriptions as $i => $rx) {
-            echo ($i + 1) . ". " . $rx['type'] . "\n";
-            echo "   Action: " . $rx['action'] . "\n";
-            
             // Generate test code for prescription
             $testCode = $this->generateTestCode($rx['type']);
             
             if ($testCode) {
-                echo "   ✅ Treatment generated\n";
                 $this->treatmentPlan[] = [
                     'prescription' => $rx,
                     'test_code' => $testCode,
                     'status' => 'pending'
                 ];
+                $planMsg .= ($i + 1) . ". **" . $rx['type'] . "** ✅\n";
+                $planMsg .= "   - Action: " . $rx['action'] . "\n";
+                $planMsg .= "   - Treatment: Generated\n\n";
             } else {
-                echo "   ⚠️  Unable to generate automated treatment\n";
                 $this->treatmentPlan[] = [
                     'prescription' => $rx,
                     'test_code' => null,
                     'status' => 'manual_required'
                 ];
+                $planMsg .= ($i + 1) . ". **" . $rx['type'] . "** ⚠️\n";
+                $planMsg .= "   - Action: " . $rx['action'] . "\n";
+                $planMsg .= "   - Treatment: Manual intervention required\n\n";
             }
-            echo "\n";
         }
+        
+        // Send to chat as doctor
+        echo "AGENT_MESSAGE:" . json_encode([
+            'agent' => 'doctor',
+            'text' => $planMsg,
+            'type' => 'markdown',
+            'timestamp' => date('c')
+        ]) . "\n";
+        if (ob_get_level() > 0) ob_flush();
+        flush();
     }
     
     private function generateTestCode($treatmentType) {
@@ -278,18 +289,29 @@ function testAPIEndpoints($projectPath) {
     }
     
     private function executeTreatment() {
-        echo "💉 Administering treatment...\n\n";
+        // Nurse message at start
+        echo "AGENT_MESSAGE:" . json_encode([
+            'agent' => 'nurse',
+            'text' => "💉 **Administering treatments...**",
+            'type' => 'markdown',
+            'timestamp' => date('c')
+        ]) . "\n";
+        if (ob_get_level() > 0) ob_flush();
+        flush();
         
         $treatmentsApplied = 0;
         $treatmentsFailed = 0;
         
+        $treatmentDetails = "";
+        
         foreach ($this->treatmentPlan as &$treatment) {
             if ($treatment['test_code'] === null) {
-                echo "⏭️  Skipping " . $treatment['prescription']['type'] . " (manual intervention required)\n";
+                $treatmentDetails .= "⏭️  **Skipping " . $treatment['prescription']['type'] . "**\n";
+                $treatmentDetails .= "   - Reason: Manual intervention required\n\n";
                 continue;
             }
             
-            echo "🔬 Applying: " . $treatment['prescription']['type'] . "\n";
+            $treatmentDetails .= "🔬 **Applying: " . $treatment['prescription']['type'] . "**\n";
             
             // Risk assessment
             $riskResult = $this->riskAssessor->assessRisk(
@@ -298,7 +320,7 @@ function testAPIEndpoints($projectPath) {
             );
             
             if ($riskResult['approved']) {
-                echo "✅ Treatment approved and applied\n";
+                $treatmentDetails .= "   - ✅ Treatment approved (risk: " . $riskResult['risk_score'] . "/100)\n";
                 $treatment['status'] = 'applied';
                 $treatmentsApplied++;
                 
@@ -307,28 +329,56 @@ function testAPIEndpoints($projectPath) {
                 file_put_contents($testFile, $treatment['test_code']);
                 $treatment['test_file'] = $testFile;
             } else {
-                echo "❌ Treatment rejected (risk score: " . $riskResult['risk_score'] . ")\n";
+                $treatmentDetails .= "   - ❌ Treatment rejected (risk: " . $riskResult['risk_score'] . "/100 - too high)\n";
                 $treatment['status'] = 'rejected';
                 $treatmentsFailed++;
             }
             
-            echo "\n";
+            $treatmentDetails .= "\n";
         }
         
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-        echo "📊 TREATMENT SUMMARY:\n";
-        echo "   Applied: $treatmentsApplied\n";
-        echo "   Failed: $treatmentsFailed\n";
-        echo "   Manual Required: " . count(array_filter($this->treatmentPlan, function($t) {
+        // Send treatment details to chat as nurse
+        echo "AGENT_MESSAGE:" . json_encode([
+            'agent' => 'nurse',
+            'text' => $treatmentDetails,
+            'type' => 'markdown',
+            'timestamp' => date('c')
+        ]) . "\n";
+        if (ob_get_level() > 0) ob_flush();
+        flush();
+        
+        // Treatment summary
+        $manualRequired = count(array_filter($this->treatmentPlan, function($t) {
             return $t['status'] === 'manual_required';
-        })) . "\n";
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+        }));
+        
+        $summaryMsg = "## 📊 Treatment Summary\n\n";
+        $summaryMsg .= "- **Applied:** $treatmentsApplied\n";
+        $summaryMsg .= "- **Failed:** $treatmentsFailed\n";
+        $summaryMsg .= "- **Manual Required:** $manualRequired\n";
+        
+        echo "AGENT_MESSAGE:" . json_encode([
+            'agent' => 'nurse',
+            'text' => $summaryMsg,
+            'type' => 'markdown',
+            'timestamp' => date('c')
+        ]) . "\n";
+        if (ob_get_level() > 0) ob_flush();
+        flush();
         
         return $treatmentsApplied > 0;
     }
     
     private function assessRecovery() {
-        echo "🩺 Post-treatment health assessment...\n\n";
+        // Doctor performs post-treatment assessment
+        echo "AGENT_MESSAGE:" . json_encode([
+            'agent' => 'doctor',
+            'text' => "🩺 **Post-treatment health assessment...**",
+            'type' => 'markdown',
+            'timestamp' => date('c')
+        ]) . "\n";
+        if (ob_get_level() > 0) ob_flush();
+        flush();
         
         // Recalculate health score
         $healthMonitor = new Scout94HealthMonitor();

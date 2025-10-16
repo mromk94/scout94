@@ -244,9 +244,16 @@ Health Check → Retry Scout94 → Pass! ✅
 ```bash
 # Run# Scout94 
 
-**An Intelligent AI-Powered Testing Suite with Holistic Analysis & 7 Specialized Agents**
+**An Intelligent AI-Powered Testing Suite with Holistic Analysis, Collaborative Reporting & 7 Specialized Agents**
 
-Scout94 is a professional Tauri desktop application that brings together cutting-edge AI agents, real-time testing, and intelligent code analysis. Built with a philosophy of understanding before acting, Scout94 analyzes your entire project holistically, traces root causes, and provides actionable insights.
+Scout94 is a professional Tauri desktop application that brings together cutting-edge AI agents, real-time testing, intelligent code analysis, and collaborative reporting. Built with a philosophy of understanding before acting, Scout94 analyzes your entire project holistically, traces root causes, and provides actionable insights through real-time multi-agent collaboration.
+
+**Latest Updates (October 16, 2025):**
+- ✅ Full collaborative reporting system with live IDE updates
+- ✅ Rich markdown chat with syntax highlighting, tables, and code blocks
+- ✅ Proper agent attribution (Doctor, Nurse, Auditor all have distinct profiles)
+- ✅ Real-time report synchronization across all agents
+- ✅ Smart summary generation (concise for high scores, detailed for diagnostics)
 
 ---
 
@@ -337,6 +344,220 @@ To add a new test to Scout94:
 - Scripts are for **local development and pre-deployment validation only**
 - All scripts should be **non-destructive** (create test databases, not modify production)
 - Scripts should **clean up after themselves** (drop test databases)
+
+---
+
+## 🤝 COLLABORATIVE REPORTING SYSTEM (October 16, 2025)
+
+Scout94 now features a revolutionary **multi-agent collaborative reporting** system where each AI agent contributes their own analysis to a shared markdown report in real-time.
+
+### **✨ Key Features**
+
+**Individual Agent Identities**
+- ✅ Each agent posts with their **own chat profile** and emoji
+- ✅ Doctor 🩺, Nurse 💉, Auditor 📊, Scout94 🚀 all have distinct bubbles
+- ✅ No more "borrowing" scout94's profile
+- ✅ Rich markdown support in chat (headers, code blocks, tables, images)
+
+**Concurrent Write Protection**
+- ✅ **Lock manager** with FIFO queue prevents file corruption
+- ✅ Agents wait their turn if report is being edited
+- ✅ Timeout protection (60s auto-release)
+- ✅ Atomic file writes (temp file + rename)
+
+**Live IDE Updates**
+- ✅ Report grows **in real-time** as agents write
+- ✅ Toast notifications when agents update
+- ✅ No manual refresh needed
+- ✅ Smooth, responsive display
+
+**Region-Based Organization**
+- ✅ **SCOUT94 region**: Functional test results
+- ✅ **CLINIC region**: Doctor diagnosis + Nurse treatments
+- ✅ **AUDITOR region**: LLM evaluation + verdict
+- ✅ HTML comment markers (invisible in rendered markdown)
+
+### **How It Works**
+
+```
+1. User clicks "Run All Tests"
+   ↓
+2. Report initialized with 3 region markers
+   → IDE auto-opens report
+   
+3. Scout94 🚀 runs functional tests
+   → Posts progress to chat with scout94 profile
+   → Writes summary to SCOUT94 region
+   → IDE updates live ✨
+   → Toast: "📝 Report updated by scout94"
+   
+4. Auditor 📊 evaluates with LLM
+   → Posts analysis to chat with auditor profile
+   → Writes summary to AUDITOR region (queued if needed)
+   → IDE updates live ✨
+   
+5. IF FAILING → Clinic intervenes:
+   
+   Doctor 🩺 diagnoses issues
+   → Posts diagnosis to chat with doctor profile
+   → Health assessment shown
+   
+   Nurse 💉 applies treatments
+   → Posts treatments to chat with nurse profile
+   → Writes clinic summary to CLINIC region
+   → IDE updates live ✨
+   
+6. Retry tests → Loop back to step 3
+
+7. FINAL: All 3 regions filled
+   → Report status: ✅ COMPLETE
+   → Comprehensive collaborative analysis ready
+```
+
+### **Report Structure**
+
+Each report contains three collaborative sections:
+
+```markdown
+# 🧪 SCOUT94 - COLLABORATIVE ANALYSIS REPORT
+
+**Project:** Your Project Name
+**Status:** 🔄 IN PROGRESS → ✅ COMPLETE
+
+---
+
+<!-- REGION:SCOUT94 -->
+## 🚀 PHASE 1: FUNCTIONAL VALIDATION (Scout94)
+
+### 🚀 Scout94 Functional Analysis
+**Test Execution:** Run #1
+**Duration:** 45s
+**Timestamp:** 4:15 PM
+
+#### Test Results Summary
+| Test Suite | Status | Details |
+|------------|--------|---------|
+| Routing | ✅ PASS | All routes valid |
+| Database | ✅ PASS | Schema injection successful |
+...
+
+<!-- END:SCOUT94 -->
+
+---
+
+<!-- REGION:CLINIC -->
+## 🏥 PHASE 2: CLINIC INTERVENTION (Doctor & Nurse)
+
+### 🏥 Clinic Intervention
+
+#### 🩺 Doctor's Diagnosis
+**Health Assessment:** 35/100 (POOR)
+**Primary Issues:**
+1. **CRITICAL** - Authentication bypass
+...
+
+#### 💉 Nurse's Treatment Log
+**Treatments Applied:** 2/2
+**Health Progression:** 35 → 72 (+37)
+...
+
+<!-- END:CLINIC -->
+
+---
+
+<!-- REGION:AUDITOR -->
+## 📊 PHASE 3: AUDIT VALIDATION (Auditor)
+
+### 📊 Auditor Evaluation
+**LLM Model:** Gemini 1.5 Pro
+**Final Score:** 7/10
+
+#### Scoring Breakdown
+| Criterion | Score | Weight | Weighted |
+|-----------|-------|--------|----------|
+| Test Completeness | 8/10 | 25% | 2.0 |
+...
+
+**Verdict:** ✅ APPROVED FOR PRODUCTION
+
+<!-- END:AUDITOR -->
+```
+
+### **Rich Chat Messages**
+
+Agents can now post **rich markdown content** in chat:
+
+**Supported Elements:**
+- ✅ **Headers** (H1, H2, H3)
+- ✅ **Code blocks** with syntax highlighting
+- ✅ **Inline code** with monospace font
+- ✅ **Tables** with responsive scrolling
+- ✅ **Lists** (ordered and unordered)
+- ✅ **Blockquotes** with blue accent
+- ✅ **Images** (auto-sized, responsive)
+- ✅ **Links** (opens in new tab)
+- ✅ **Bold** and *italic* text
+
+**Example:**
+```markdown
+## 🔍 Analysis Complete
+
+**Findings:**
+1. Database schema valid ✅
+2. API endpoints tested ✅
+
+### Code Sample
+```php
+function test() {
+    return "success";
+}
+```
+
+| Metric | Value |
+|--------|-------|
+| Tests | 45 |
+| Passed | 43 |
+```
+
+### **Technical Implementation**
+
+**Files:**
+- `report-lock-manager.js` - Concurrent access control
+- `report-writer.js` - Region-based writing
+- `report-helper.php` - Summary generators
+- `ChatBubble_old.jsx` - Rich markdown rendering
+- `IDEPane.jsx` - Live update handlers
+- `server.js` - Signal processing
+
+**See:** `COLLABORATIVE_REPORT_TODO.md` for complete implementation details.
+
+---
+
+## 📋 CHANGELOG
+
+### **October 16, 2025 - Phase 2 Bug Fixes**
+
+**🔧 Critical Fixes:**
+- Fixed undefined method `Scout94Clinic::generateTreatment()` - Clinic flow now properly uses internal methods
+- Fixed undefined array key `health_status` - Using correct return value keys from clinic
+- **Fixed IDE live updates for Auditor** - Added output buffer flush to `writeAgentSummary()`
+- Fixed agent attribution - Clinic activities now appear under Doctor 🩺 and Nurse 💉 (not scout94)
+- Added `screenshotter` alias to agent profiles for name flexibility
+
+**🎯 Root Causes Addressed:**
+1. **Output Buffering:** PHP was buffering `REPORT_WRITE` signals - added explicit `flush()` calls
+2. **Missing AGENT_MESSAGE Wrappers:** Clinic was using raw echo - wrapped all output with proper JSON signals
+3. **Misunderstood Clinic Flow:** `admitPatient()` is all-in-one method - removed non-existent method calls
+
+**📝 Files Modified:**
+- `run_comprehensive_with_agents.php` - Fixed clinic integration
+- `php-helpers/report-helper.php` - Added buffer flushing
+- `scout94_clinic.php` - Wrapped all output with AGENT_MESSAGE
+- `ui/src/components/ChatBubble_old.jsx` - Added screenshotter alias
+
+**📚 Documentation:**
+- Created `FIXES_APPLIED_OCT16.md` - Phase 1 fixes (collaborative reporting integration)
+- Created `FIXES_APPLIED_OCT16_PHASE2.md` - Phase 2 fixes (bug fixes and root cause analysis)
 
 ---
 

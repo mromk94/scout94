@@ -33,15 +33,40 @@ export default function useWebSocket() {
           // Ignore heartbeat messages
           if (data.type === 'heartbeat') return;
 
+          // Handle open_file message - auto-open report in IDE
+          if (data.type === 'open_file' && data.filePath) {
+            console.log('📄 Auto-opening file:', data.filePath);
+            // Dispatch custom event for IDE pane to handle
+            window.dispatchEvent(new CustomEvent('scout94-open-file', {
+              detail: { filePath: data.filePath }
+            }));
+            return;
+          }
+
           // Handle different message types
           if (data.type === 'message' || data.type === 'log' || data.type === 'connected') {
+            const messageText = data.text || data.message;
+            
             setMessages((prev) => [...prev, {
               id: Date.now() + Math.random(),
               agent: data.agent || 'scout94',
-              text: data.text || data.message,
+              text: messageText,
               timestamp: new Date(data.timestamp || Date.now()),
               type: data.messageType || 'message'
             }]);
+            
+            // Detect test completion and reset isRunning
+            if (messageText && (
+              messageText.includes('Test completed successfully') ||
+              messageText.includes('ALL TESTS PASSED') ||
+              messageText.includes('Analysis Complete') ||
+              messageText.includes('Test failed') ||
+              messageText.includes('PRODUCTION READY')
+            )) {
+              console.log('✅ Test completion detected, resetting state');
+              setIsRunning(false);
+              runningTestRef.current = null;
+            }
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);

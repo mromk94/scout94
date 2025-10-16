@@ -36,7 +36,51 @@ export default function IDEPane({ isRunning, messages, projectPath }) {
     if (fileDisplayMsg && fileDisplayMsg.filePath) {
       loadMarkdownFile(fileDisplayMsg.filePath);
     }
-  }, [messages]);
+    
+    // Listen for live file content updates (collaborative reporting)
+    const fileUpdateMsg = messages.find(m => m.type === 'file_content_updated');
+    if (fileUpdateMsg) {
+      const { filePath, content, updatedBy, region } = fileUpdateMsg;
+      
+      // If this file is currently open, update it
+      if (markdownFilePath === filePath) {
+        console.log(`📝 Live update from ${updatedBy} (${region} region)`);
+        setMarkdownContent(content);
+        
+        // Show toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-blue-600/90 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in-right';
+        toast.innerHTML = `📝 Report updated by <strong>${updatedBy}</strong>`;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transition = 'opacity 0.3s';
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+      
+      // Update file contents cache if file is in tabs
+      if (fileContents[filePath]) {
+        setFileContents(prev => ({
+          ...prev,
+          [filePath]: content
+        }));
+      }
+    }
+  }, [messages, markdownFilePath, fileContents]);
+  
+  // Listen for auto-open file events from comprehensive scan
+  useEffect(() => {
+    const handleAutoOpenFile = (event) => {
+      const { filePath } = event.detail;
+      console.log('🎯 Auto-opening comprehensive report:', filePath);
+      loadMarkdownFile(filePath);
+    };
+    
+    window.addEventListener('scout94-open-file', handleAutoOpenFile);
+    return () => window.removeEventListener('scout94-open-file', handleAutoOpenFile);
+  }, []);
   
   const loadMarkdownFile = async (filePath) => {
     try {
