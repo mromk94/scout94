@@ -8,6 +8,7 @@ import IDEPane from './IDEPane';
 import ProjectSelector from './ProjectSelector';
 import AgentBar from './AgentBar';
 import ImageViewer from './ImageViewer';
+import SettingsModal from './settings/SettingsModal';
 import { invoke } from '@tauri-apps/api/core';
 
 export default function MissionControl() {
@@ -20,6 +21,7 @@ export default function MissionControl() {
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [currentReportPath, setCurrentReportPath] = useState(null);
   const [showProjectSelector, setShowProjectSelector] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const chatInputRef = React.useRef(null);
   
   // Resizable panels state
@@ -180,7 +182,11 @@ export default function MissionControl() {
           </div>
 
           {/* Settings */}
-          <button className="p-2 hover:bg-white/10 rounded-lg transition">
+          <button 
+            onClick={() => setShowSettings(true)}
+            className="p-2 hover:bg-white/10 rounded-lg transition"
+            title="Settings"
+          >
             <Settings className="w-5 h-5" />
           </button>
         </div>
@@ -255,6 +261,12 @@ export default function MissionControl() {
           onClose={() => setShowImageViewer(false)}
         />
       )}
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
     </div>
   );
 }

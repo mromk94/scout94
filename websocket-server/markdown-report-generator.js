@@ -6,6 +6,7 @@
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { MockDetector } from './mock-detector.js';
+import { ContextDetector } from './context-detector.js';
 
 /**
  * Generate Comprehensive Markdown Report
@@ -241,16 +242,105 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
 }
 
 /**
- * Calculate Overall Health Score
+ * Calculate Overall Health Score (Context-Aware)
+ * 
+ * Phase 1 Improvement: Weighted deductions based on severity and context
+ * - No longer treats all issues equally
+ * - Considers file context to filter false positives
+ * - Uses weighted deductions instead of linear
  */
-function calculateHealthScore(securityIssues, performanceIssues, qualityIssues, errors) {
-  const totalIssues = (securityIssues || 0) + (performanceIssues || 0) + 
-                     (qualityIssues || 0) + (errors || 0);
+function calculateHealthScore(securityIssues, performanceIssues, qualityIssues, errors, context = {}) {
+  const baseScore = 100;
   
-  const maxScore = 100;
-  const deduction = Math.min(totalIssues * 0.5, 80); // Max 80 points deduction
+  // Weighted deductions by severity
+  const deductions = {
+    CRITICAL: 10.0,  // Critical issues are severe
+    HIGH: 2.0,       // High issues matter
+    MEDIUM: 0.5,     // Medium issues are minor
+    LOW: 0.1,        // Low issues barely impact score
+    INFO: 0.0        // Info doesn't affect score
+  };
   
-  return Math.max(Math.round(maxScore - deduction), 10); // Min score 10
+  // Apply weighted deductions
+  let totalDeduction = 0;
+  
+  // Security issues are typically CRITICAL or HIGH
+  totalDeduction += (securityIssues || 0) * deductions.HIGH;
+  
+  // Performance issues are MEDIUM
+  totalDeduction += (performanceIssues || 0) * deductions.MEDIUM;
+  
+  // Quality issues are LOW (often intentional patterns)
+  totalDeduction += (qualityIssues || 0) * deductions.LOW;
+  
+  // Errors are HIGH
+  totalDeduction += (errors || 0) * deductions.HIGH;
+  
+  // Calculate final score
+  const finalScore = Math.max(0, Math.min(100, baseScore - totalDeduction));
+  
+  // Round to 1 decimal place for precision
+  return Math.round(finalScore * 10) / 10;
+}
+
+/**
+ * Calculate Health Score with Full Context Awareness
+ * 
+ * This version takes actual issue objects with severity and applies context filtering
+ */
+function calculateContextAwareHealthScore(issues, projectContext = {}) {
+  const contextDetector = new ContextDetector();
+  const baseScore = 100;
+  
+  const deductions = {
+    CRITICAL: 10.0,
+    HIGH: 2.0,
+    MEDIUM: 0.5,
+    LOW: 0.1,
+    INFO: 0.0
+  };
+  
+  let totalDeduction = 0;
+  let filteredCount = 0;
+  
+  // Process each issue with context awareness
+  for (const issue of issues) {
+    // Detect context if file path provided
+    const context = issue.filePath ? 
+      contextDetector.detectFileContext(issue.filePath) : {};
+    
+    // Check if this is a false positive
+    if (contextDetector.shouldIgnoreIssue(issue, context)) {
+      filteredCount++;
+      continue; // Skip this issue
+    }
+    
+    // Apply severity-based deduction
+    const severity = issue.severity || 'MEDIUM';
+    const deduction = deductions[severity] || deductions.MEDIUM;
+    
+    // Apply context-based adjustment
+    const adjustment = contextDetector.adjustSeverity(issue, context);
+    const adjustedDeduction = Math.max(0, deduction + adjustment);
+    
+    totalDeduction += adjustedDeduction;
+  }
+  
+  // Calculate final score
+  const finalScore = Math.max(0, Math.min(100, baseScore - totalDeduction));
+  
+  // Log filtering stats
+  if (filteredCount > 0) {
+    console.log(`   ℹ️  Filtered ${filteredCount} false positives using context awareness`);
+  }
+  
+  return {
+    score: Math.round(finalScore * 10) / 10,
+    totalIssues: issues.length,
+    filteredIssues: filteredCount,
+    analyzedIssues: issues.length - filteredCount,
+    deduction: Math.round(totalDeduction * 10) / 10
+  };
 }
 
 /**
@@ -298,5 +388,9 @@ export function saveReport(markdown, projectPath) {
 
 export default {
   generateMarkdownReport,
-  saveReport
+  saveReport,
+  calculateContextAwareHealthScore
 };
+
+// Named export for direct import
+export { calculateContextAwareHealthScore };

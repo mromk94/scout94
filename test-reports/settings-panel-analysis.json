@@ -1,0 +1,1486 @@
+{
+  "timestamp": "2025-10-16T20:52:00.155Z",
+  "scope": "Scout94 Admin Settings Panel (ui/src/components/settings)",
+  "summary": {
+    "filesAnalyzed": 17,
+    "totalLines": 4601,
+    "totalSizeKB": "173.59",
+    "healthScore": 0,
+    "issues": {
+      "total": 63,
+      "high": 1,
+      "medium": 23,
+      "low": 29,
+      "info": 10
+    },
+    "duplicates": 7
+  },
+  "stats": {
+    "components": 17,
+    "imports": 89,
+    "exports": 17,
+    "functions": 18,
+    "hooks": 20,
+    "stateVariables": 12,
+    "props": 0
+  },
+  "issuesBySeverity": {
+    "HIGH": [
+      {
+        "severity": "HIGH",
+        "type": "missing_error_handling",
+        "category": "reliability",
+        "message": "Async operations without error handling",
+        "file": "AdvancedSettings.jsx"
+      }
+    ],
+    "MEDIUM": [
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "SettingToggle.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "SettingsModal.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "large_component",
+        "category": "maintainability",
+        "message": "Component is 418 lines (consider splitting)",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "AgentSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "AgentSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "AnalysisSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "CommunicationSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "large_component",
+        "category": "maintainability",
+        "message": "Component is 463 lines (consider splitting)",
+        "file": "CommunicationSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "GeneralSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "GeneralSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "LLMSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "LLMSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "ReportingSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "SearchSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "SearchSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "SecuritySettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "StorageSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "StorageSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "TestingSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "UISettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "UISettings.jsx"
+      }
+    ],
+    "LOW": [
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SettingDropdown.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SettingInput.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SettingSlider.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SettingToggle.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "13 magic numbers (should be constants)",
+        "file": "SettingsModal.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SettingsModal.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "16 magic numbers (should be constants)",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "16 magic numbers (should be constants)",
+        "file": "AgentSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "AgentSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "17 magic numbers (should be constants)",
+        "file": "AnalysisSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "AnalysisSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "19 magic numbers (should be constants)",
+        "file": "CommunicationSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "CommunicationSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "debug_code",
+        "category": "code_quality",
+        "message": "1 console statements (should be removed for production)",
+        "file": "GeneralSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "11 magic numbers (should be constants)",
+        "file": "GeneralSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "26 magic numbers (should be constants)",
+        "file": "LLMSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "LLMSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "ReportingSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "20 magic numbers (should be constants)",
+        "file": "SearchSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SearchSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "20 magic numbers (should be constants)",
+        "file": "SecuritySettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SecuritySettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "12 magic numbers (should be constants)",
+        "file": "StorageSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "StorageSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "20 magic numbers (should be constants)",
+        "file": "TestingSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "TestingSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "11 magic numbers (should be constants)",
+        "file": "UISettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "UISettings.jsx"
+      }
+    ],
+    "INFO": [
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "34 hardcoded strings (consider i18n)",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "51 hardcoded strings (consider i18n)",
+        "file": "AnalysisSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "57 hardcoded strings (consider i18n)",
+        "file": "CommunicationSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "29 hardcoded strings (consider i18n)",
+        "file": "GeneralSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "23 hardcoded strings (consider i18n)",
+        "file": "LLMSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "40 hardcoded strings (consider i18n)",
+        "file": "ReportingSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "29 hardcoded strings (consider i18n)",
+        "file": "SecuritySettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "34 hardcoded strings (consider i18n)",
+        "file": "StorageSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "38 hardcoded strings (consider i18n)",
+        "file": "TestingSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "36 hardcoded strings (consider i18n)",
+        "file": "UISettings.jsx"
+      }
+    ]
+  },
+  "issuesByCategory": {
+    "code_quality": [
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SettingDropdown.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SettingInput.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SettingSlider.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SettingToggle.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SettingsModal.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "AgentSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "AnalysisSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "CommunicationSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "debug_code",
+        "category": "code_quality",
+        "message": "1 console statements (should be removed for production)",
+        "file": "GeneralSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "LLMSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "ReportingSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SearchSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "SecuritySettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "StorageSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "TestingSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "unused_import",
+        "category": "code_quality",
+        "message": "Unused import: React",
+        "file": "UISettings.jsx"
+      }
+    ],
+    "accessibility": [
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "SettingToggle.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "SettingsModal.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "AgentSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "GeneralSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "LLMSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "SearchSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "StorageSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_accessibility",
+        "category": "accessibility",
+        "message": "Interactive elements missing ARIA attributes",
+        "file": "UISettings.jsx"
+      }
+    ],
+    "maintainability": [
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "13 magic numbers (should be constants)",
+        "file": "SettingsModal.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "large_component",
+        "category": "maintainability",
+        "message": "Component is 418 lines (consider splitting)",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "16 magic numbers (should be constants)",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "16 magic numbers (should be constants)",
+        "file": "AgentSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "17 magic numbers (should be constants)",
+        "file": "AnalysisSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "large_component",
+        "category": "maintainability",
+        "message": "Component is 463 lines (consider splitting)",
+        "file": "CommunicationSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "19 magic numbers (should be constants)",
+        "file": "CommunicationSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "11 magic numbers (should be constants)",
+        "file": "GeneralSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "26 magic numbers (should be constants)",
+        "file": "LLMSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "20 magic numbers (should be constants)",
+        "file": "SearchSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "20 magic numbers (should be constants)",
+        "file": "SecuritySettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "12 magic numbers (should be constants)",
+        "file": "StorageSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "20 magic numbers (should be constants)",
+        "file": "TestingSettings.jsx"
+      },
+      {
+        "severity": "LOW",
+        "type": "magic_numbers",
+        "category": "maintainability",
+        "message": "11 magic numbers (should be constants)",
+        "file": "UISettings.jsx"
+      }
+    ],
+    "type_safety": [
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "AgentSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "AnalysisSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "CommunicationSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "GeneralSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "LLMSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "ReportingSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "SearchSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "SecuritySettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "StorageSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "TestingSettings.jsx"
+      },
+      {
+        "severity": "MEDIUM",
+        "type": "missing_proptypes",
+        "category": "type_safety",
+        "message": "Component missing PropTypes or TypeScript types",
+        "file": "UISettings.jsx"
+      }
+    ],
+    "reliability": [
+      {
+        "severity": "HIGH",
+        "type": "missing_error_handling",
+        "category": "reliability",
+        "message": "Async operations without error handling",
+        "file": "AdvancedSettings.jsx"
+      }
+    ],
+    "internationalization": [
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "34 hardcoded strings (consider i18n)",
+        "file": "AdvancedSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "51 hardcoded strings (consider i18n)",
+        "file": "AnalysisSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "57 hardcoded strings (consider i18n)",
+        "file": "CommunicationSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "29 hardcoded strings (consider i18n)",
+        "file": "GeneralSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "23 hardcoded strings (consider i18n)",
+        "file": "LLMSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "40 hardcoded strings (consider i18n)",
+        "file": "ReportingSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "29 hardcoded strings (consider i18n)",
+        "file": "SecuritySettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "34 hardcoded strings (consider i18n)",
+        "file": "StorageSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "38 hardcoded strings (consider i18n)",
+        "file": "TestingSettings.jsx"
+      },
+      {
+        "severity": "INFO",
+        "type": "hardcoded_strings",
+        "category": "internationalization",
+        "message": "36 hardcoded strings (consider i18n)",
+        "file": "UISettings.jsx"
+      }
+    ]
+  },
+  "duplicates": [
+    {
+      "file1": "SettingDropdown.jsx",
+      "file2": "SettingInput.jsx",
+      "similarity": "70%"
+    },
+    {
+      "file1": "SettingDropdown.jsx",
+      "file2": "SettingSlider.jsx",
+      "similarity": "53%"
+    },
+    {
+      "file1": "SettingDropdown.jsx",
+      "file2": "SettingToggle.jsx",
+      "similarity": "63%"
+    },
+    {
+      "file1": "SettingInput.jsx",
+      "file2": "SettingSlider.jsx",
+      "similarity": "53%"
+    },
+    {
+      "file1": "SettingInput.jsx",
+      "file2": "SettingToggle.jsx",
+      "similarity": "56%"
+    },
+    {
+      "file1": "SettingSlider.jsx",
+      "file2": "SettingToggle.jsx",
+      "similarity": "52%"
+    },
+    {
+      "file1": "SecuritySettings.jsx",
+      "file2": "TestingSettings.jsx",
+      "similarity": "54%"
+    }
+  ],
+  "detailedFiles": [
+    {
+      "path": "ui/src/components/settings/SettingDropdown.jsx",
+      "name": "SettingDropdown.jsx",
+      "lines": 51,
+      "size": 1773,
+      "issues": [
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/SettingInput.jsx",
+      "name": "SettingInput.jsx",
+      "lines": 56,
+      "size": 1820,
+      "issues": [
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/SettingSlider.jsx",
+      "name": "SettingSlider.jsx",
+      "lines": 72,
+      "size": 2215,
+      "issues": [
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/SettingToggle.jsx",
+      "name": "SettingToggle.jsx",
+      "lines": 48,
+      "size": 1540,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_accessibility",
+          "category": "accessibility",
+          "message": "Interactive elements missing ARIA attributes"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/SettingsModal.jsx",
+      "name": "SettingsModal.jsx",
+      "lines": 299,
+      "size": 11555,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_accessibility",
+          "category": "accessibility",
+          "message": "Interactive elements missing ARIA attributes"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "13 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/AdvancedSettings.jsx",
+      "name": "AdvancedSettings.jsx",
+      "lines": 418,
+      "size": 15951,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "HIGH",
+          "type": "missing_error_handling",
+          "category": "reliability",
+          "message": "Async operations without error handling"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "large_component",
+          "category": "maintainability",
+          "message": "Component is 418 lines (consider splitting)"
+        },
+        {
+          "severity": "INFO",
+          "type": "hardcoded_strings",
+          "category": "internationalization",
+          "message": "34 hardcoded strings (consider i18n)"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "missing_accessibility",
+          "category": "accessibility",
+          "message": "Interactive elements missing ARIA attributes"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "16 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/AgentSettings.jsx",
+      "name": "AgentSettings.jsx",
+      "lines": 333,
+      "size": 12055,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "missing_accessibility",
+          "category": "accessibility",
+          "message": "Interactive elements missing ARIA attributes"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "16 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/AnalysisSettings.jsx",
+      "name": "AnalysisSettings.jsx",
+      "lines": 367,
+      "size": 14462,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "INFO",
+          "type": "hardcoded_strings",
+          "category": "internationalization",
+          "message": "51 hardcoded strings (consider i18n)"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "17 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/CommunicationSettings.jsx",
+      "name": "CommunicationSettings.jsx",
+      "lines": 463,
+      "size": 18381,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "large_component",
+          "category": "maintainability",
+          "message": "Component is 463 lines (consider splitting)"
+        },
+        {
+          "severity": "INFO",
+          "type": "hardcoded_strings",
+          "category": "internationalization",
+          "message": "57 hardcoded strings (consider i18n)"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "19 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/GeneralSettings.jsx",
+      "name": "GeneralSettings.jsx",
+      "lines": 248,
+      "size": 9540,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "LOW",
+          "type": "debug_code",
+          "category": "code_quality",
+          "message": "1 console statements (should be removed for production)"
+        },
+        {
+          "severity": "INFO",
+          "type": "hardcoded_strings",
+          "category": "internationalization",
+          "message": "29 hardcoded strings (consider i18n)"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "missing_accessibility",
+          "category": "accessibility",
+          "message": "Interactive elements missing ARIA attributes"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "11 magic numbers (should be constants)"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/LLMSettings.jsx",
+      "name": "LLMSettings.jsx",
+      "lines": 354,
+      "size": 14046,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "INFO",
+          "type": "hardcoded_strings",
+          "category": "internationalization",
+          "message": "23 hardcoded strings (consider i18n)"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "missing_accessibility",
+          "category": "accessibility",
+          "message": "Interactive elements missing ARIA attributes"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "26 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/ReportingSettings.jsx",
+      "name": "ReportingSettings.jsx",
+      "lines": 323,
+      "size": 13223,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "INFO",
+          "type": "hardcoded_strings",
+          "category": "internationalization",
+          "message": "40 hardcoded strings (consider i18n)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/SearchSettings.jsx",
+      "name": "SearchSettings.jsx",
+      "lines": 227,
+      "size": 9803,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "missing_accessibility",
+          "category": "accessibility",
+          "message": "Interactive elements missing ARIA attributes"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "20 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/SecuritySettings.jsx",
+      "name": "SecuritySettings.jsx",
+      "lines": 351,
+      "size": 14178,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "INFO",
+          "type": "hardcoded_strings",
+          "category": "internationalization",
+          "message": "29 hardcoded strings (consider i18n)"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "20 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/StorageSettings.jsx",
+      "name": "StorageSettings.jsx",
+      "lines": 297,
+      "size": 10721,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "INFO",
+          "type": "hardcoded_strings",
+          "category": "internationalization",
+          "message": "34 hardcoded strings (consider i18n)"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "missing_accessibility",
+          "category": "accessibility",
+          "message": "Interactive elements missing ARIA attributes"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "12 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/TestingSettings.jsx",
+      "name": "TestingSettings.jsx",
+      "lines": 379,
+      "size": 15036,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "INFO",
+          "type": "hardcoded_strings",
+          "category": "internationalization",
+          "message": "38 hardcoded strings (consider i18n)"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "20 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    },
+    {
+      "path": "ui/src/components/settings/sections/UISettings.jsx",
+      "name": "UISettings.jsx",
+      "lines": 315,
+      "size": 11453,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "missing_proptypes",
+          "category": "type_safety",
+          "message": "Component missing PropTypes or TypeScript types"
+        },
+        {
+          "severity": "INFO",
+          "type": "hardcoded_strings",
+          "category": "internationalization",
+          "message": "36 hardcoded strings (consider i18n)"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "missing_accessibility",
+          "category": "accessibility",
+          "message": "Interactive elements missing ARIA attributes"
+        },
+        {
+          "severity": "LOW",
+          "type": "magic_numbers",
+          "category": "maintainability",
+          "message": "11 magic numbers (should be constants)"
+        },
+        {
+          "severity": "LOW",
+          "type": "unused_import",
+          "category": "code_quality",
+          "message": "Unused import: React"
+        }
+      ]
+    }
+  ]
+}

@@ -3,20 +3,115 @@
  * 
  * Purpose: Analyze code duplicates holistically before making decisions
  * Philosophy: Every duplicate exists for a reason - understand before deleting
+ * 
+ * Phase 1 Improvement: Added context-aware duplicate analysis
+ * - Understands file purpose (UI, config, test, etc.)
+ * - Detects intentional duplicates (different use cases)
+ * - Provides merge strategies with steps
  */
+
+import { ContextDetector } from './context-detector.js';
 
 export class DuplicateAnalyzer {
   
   /**
    * Analyzes duplicate functions/code to understand their purpose
+   * Phase 1 Enhancement: Now includes file context for better intent detection
    */
-  static analyzeDuplicates(duplicate1, duplicate2) {
+  static analyzeDuplicates(duplicate1, duplicate2, file1Path = null, file2Path = null) {
+    const contextDetector = new ContextDetector();
+    
+    // Detect file contexts if paths provided
+    const context1 = file1Path ? contextDetector.detectFileContext(file1Path, duplicate1) : null;
+    const context2 = file2Path ? contextDetector.detectFileContext(file2Path, duplicate2) : null;
+    
+    // Analyze features
+    const features1 = this.analyzeFeatures(duplicate1);
+    const features2 = this.analyzeFeatures(duplicate2);
+    
+    // Compare features
+    const comparison = this.compareFeatures(duplicate1, duplicate2);
+    
+    // Detect intent (why do both exist?)
+    const intent = this.detectIntent(duplicate1, duplicate2, context1, context2);
+    
+    // Get recommendation with context awareness
+    const recommendation = this.getRecommendation(duplicate1, duplicate2, intent, context1, context2);
+    
     return {
-      duplicate1: this.analyzeFeatures(duplicate1),
-      duplicate2: this.analyzeFeatures(duplicate2),
-      comparison: this.compareFeatures(duplicate1, duplicate2),
-      recommendation: this.getRecommendation(duplicate1, duplicate2)
+      duplicate1: {
+        ...features1,
+        context: context1 ? contextDetector.describeContext(context1) : 'Unknown',
+        filePath: file1Path
+      },
+      duplicate2: {
+        ...features2,
+        context: context2 ? contextDetector.describeContext(context2) : 'Unknown',
+        filePath: file2Path
+      },
+      comparison,
+      intent,
+      recommendation
     };
+  }
+  
+  /**
+   * Detect why both duplicates might exist (intent analysis)
+   */
+  static detectIntent(code1, code2, context1, context2) {
+    const intents = [];
+    
+    // Different file contexts suggest different purposes
+    if (context1 && context2) {
+      if (context1.isTest !== context2.isTest) {
+        intents.push({
+          reason: 'TEST_VS_PROD',
+          confidence: 'HIGH',
+          explanation: 'One is test code, one is production - both needed'
+        });
+      }
+      
+      if (context1.isSettings && context2.isSettings) {
+        intents.push({
+          reason: 'SETTINGS_SECTIONS',
+          confidence: 'HIGH',
+          explanation: 'Both are settings sections - likely intentional for UX organization'
+        });
+      }
+      
+      if (context1.isUIComponent && context2.isUIComponent) {
+        const comp1 = this.compareFeatures(code1, code2);
+        if (comp1.uniqueToFirst.length > 0 || comp1.uniqueToSecond.length > 0) {
+          intents.push({
+            reason: 'UI_VARIANTS',
+            confidence: 'MEDIUM',
+            explanation: 'Different UI components for different use cases'
+          });
+        }
+      }
+    }
+    
+    // Different parameter counts suggest different use cases
+    const params1 = this.extractParameters(code1);
+    const params2 = this.extractParameters(code2);
+    if (params1.length !== params2.length) {
+      intents.push({
+        reason: 'OVERLOADED_FUNCTION',
+        confidence: 'MEDIUM',
+        explanation: 'Different signatures suggest function overloading pattern'
+      });
+    }
+    
+    // If no clear intent detected
+    if (intents.length === 0) {
+      intents.push({
+        reason: 'UNINTENTIONAL_DUPLICATE',
+        confidence: 'LOW',
+        explanation: 'No clear reason found - likely accidental duplication'
+      });
+    }
+    
+    return intents;
   }
 
   /**
@@ -52,16 +147,36 @@ export class DuplicateAnalyzer {
 
   /**
    * Provide recommendation on how to handle duplicates
+   * Phase 1 Enhancement: Uses intent analysis to make smarter recommendations
    */
-  static getRecommendation(code1, code2) {
+  static getRecommendation(code1, code2, intent = [], context1 = null, context2 = null) {
     const comparison = this.compareFeatures(code1, code2);
+    
+    // Check if intentional duplicate (should keep both)
+    if (intent && intent.length > 0) {
+      const highConfidenceIntent = intent.find(i => i.confidence === 'HIGH');
+      if (highConfidenceIntent) {
+        if (['TEST_VS_PROD', 'SETTINGS_SECTIONS', 'UI_VARIANTS'].includes(highConfidenceIntent.reason)) {
+          return {
+            action: 'KEEP_BOTH',
+            reason: `Intentional duplicate: ${highConfidenceIntent.explanation}`,
+            details: {
+              intent: highConfidenceIntent.reason,
+              confidence: highConfidenceIntent.confidence
+            },
+            priority: 'LOW'
+          };
+        }
+      }
+    }
     
     // If one is strictly more feature-rich
     if (comparison.uniqueToFirst.length > 0 && comparison.uniqueToSecond.length === 0) {
       return {
         action: 'KEEP_FIRST',
         reason: 'First version has all features of second plus additional ones',
-        details: `Unique features: ${comparison.uniqueToFirst.join(', ')}`
+        details: `Unique features: ${comparison.uniqueToFirst.join(', ')}`,
+        priority: 'MEDIUM'
       };
     }
     
@@ -69,7 +184,8 @@ export class DuplicateAnalyzer {
       return {
         action: 'KEEP_SECOND',
         reason: 'Second version has all features of first plus additional ones',
-        details: `Unique features: ${comparison.uniqueToSecond.join(', ')}`
+        details: `Unique features: ${comparison.uniqueToSecond.join(', ')}`,
+        priority: 'MEDIUM'
       };
     }
     
@@ -80,8 +196,10 @@ export class DuplicateAnalyzer {
         reason: 'Both versions have unique valuable features',
         details: {
           fromFirst: comparison.uniqueToFirst,
-          fromSecond: comparison.uniqueToSecond
-        }
+          fromSecond: comparison.uniqueToSecond,
+          mergeStrategy: this.generateMergeStrategy(code1, code2)
+        },
+        priority: 'HIGH'
       };
     }
     
@@ -89,7 +207,8 @@ export class DuplicateAnalyzer {
     return {
       action: 'REMOVE_DUPLICATE',
       reason: 'Functions are identical - safe to remove one',
-      details: 'Keep the one with better naming or more usage'
+      details: 'Keep the one with better naming or more usage',
+      priority: 'LOW'
     };
   }
 
