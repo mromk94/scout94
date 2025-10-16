@@ -9,11 +9,18 @@ import { join } from 'path';
 /**
  * Generate Comprehensive Markdown Report
  */
-export function generateMarkdownReport(projectMap, rootCauseAnalysis, scanResults) {
+export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
   console.log('📝 Phase 3: Generating markdown report...');
   
   const timestamp = new Date().toLocaleString();
   const { rootCauses, impactAnalysis } = rootCauseAnalysis;
+  
+  // Extract actual values from results object structure
+  const securityIssues = results.scans?.securityAnalysis?.totalIssues || 0;
+  const performanceIssues = results.scans?.performanceAnalysis?.metrics?.slowQueries || 0;
+  const qualityIssues = results.deepAnalysis?.codeQuality?.reduce((sum, r) => sum + (r.issues?.length || 0), 0) || 0;
+  const errors = results.scans?.errorAnalysis?.summary?.totalErrors || 0;
+  const totalFiles = results.scans?.projectIndex?.summary?.totalFiles || 0;
   
   let markdown = '';
   
@@ -22,7 +29,7 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, scanResult
   // ============================================
   markdown += `# 🔍 Scout94 Comprehensive Analysis Report\n\n`;
   markdown += `**Generated:** ${timestamp}  \n`;
-  markdown += `**Project:** ${scanResults.projectPath}  \n`;
+  markdown += `**Project:** ${results.projectPath}  \n`;
   markdown += `**Architecture:** ${projectMap.architecture}  \n`;
   markdown += `**Frameworks:** ${projectMap.frameworks.join(', ')}  \n\n`;
   
@@ -33,19 +40,19 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, scanResult
   // ============================================
   markdown += `## 📊 Executive Summary\n\n`;
   
-  const totalIssues = scanResults.securityIssues + scanResults.performanceIssues + 
-                     scanResults.qualityIssues + scanResults.errors;
+  const totalIssues = securityIssues + performanceIssues + qualityIssues + errors;
+  const healthScore = calculateHealthScore(securityIssues, performanceIssues, qualityIssues, errors);
   
-  markdown += `### Overall Health Score: ${calculateHealthScore(scanResults)}%\n\n`;
+  markdown += `### Overall Health Score: ${healthScore}%\n\n`;
   
   markdown += `| Metric | Count | Status |\n`;
   markdown += `|--------|-------|--------|\n`;
   markdown += `| **Total Issues Found** | ${totalIssues} | ${totalIssues > 50 ? '🔴 Critical' : totalIssues > 20 ? '🟡 Warning' : '🟢 Good'} |\n`;
   markdown += `| **Root Causes Identified** | ${rootCauses.length} | ${rootCauses.length > 5 ? '🔴' : '🟢'} |\n`;
   markdown += `| **Critical Issues** | ${impactAnalysis.criticalCount} | ${impactAnalysis.criticalCount > 0 ? '🔴 Immediate Action Required' : '🟢'} |\n`;
-  markdown += `| **Files Analyzed** | ${scanResults.totalFiles} | 📁 |\n`;
-  markdown += `| **Security Vulnerabilities** | ${scanResults.securityIssues} | ${scanResults.securityIssues > 10 ? '🔴 High Risk' : scanResults.securityIssues > 0 ? '🟡' : '🟢'} |\n`;
-  markdown += `| **Performance Issues** | ${scanResults.performanceIssues} | ${scanResults.performanceIssues > 10 ? '🟡' : '🟢'} |\n\n`;
+  markdown += `| **Files Analyzed** | ${totalFiles} | 📁 |\n`;
+  markdown += `| **Security Vulnerabilities** | ${securityIssues} | ${securityIssues > 10 ? '🔴 High Risk' : securityIssues > 0 ? '🟡' : '🟢'} |\n`;
+  markdown += `| **Performance Issues** | ${performanceIssues} | ${performanceIssues > 10 ? '🟡' : '🟢'} |\n\n`;
   
   markdown += `### 🎯 Cascade Risk Assessment: **${impactAnalysis.cascadeRisk}**\n\n`;
   
@@ -227,9 +234,9 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, scanResult
 /**
  * Calculate Overall Health Score
  */
-function calculateHealthScore(scanResults) {
-  const totalIssues = scanResults.securityIssues + scanResults.performanceIssues + 
-                     scanResults.qualityIssues + scanResults.errors;
+function calculateHealthScore(securityIssues, performanceIssues, qualityIssues, errors) {
+  const totalIssues = (securityIssues || 0) + (performanceIssues || 0) + 
+                     (qualityIssues || 0) + (errors || 0);
   
   const maxScore = 100;
   const deduction = Math.min(totalIssues * 0.5, 80); // Max 80 points deduction
