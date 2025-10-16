@@ -232,24 +232,24 @@ while ($attempt <= $maxRetries) {
             'health_score' => $clinicResult['initial_health'],
             'issues' => [] // Clinic doesn't expose detailed diagnosis structure
         ]);
-    
-    // Check if clinic was able to help
-    if (!$clinicResult['needs_treatment']) {
-        sendToChat('doctor', "✅ Patient health acceptable. No treatment required.", 'success');
-        sendToChat('scout94', "🔄 **Retrying tests...**", 'markdown');
-        continue; // Skip to next iteration
-    }
-    
-    // Report clinic results to chat
-    $healthGain = $clinicResult['final_health'] - $clinicResult['initial_health'];
-    $clinicSummaryMsg = "## 🏥 Clinic Treatment Complete\n\n";
-    $clinicSummaryMsg .= "**Initial Health:** " . $clinicResult['initial_health'] . "/100\n";
-    $clinicSummaryMsg .= "**Final Health:** " . $clinicResult['final_health'] . "/100\n";
-    $clinicSummaryMsg .= "**Health Gain:** +" . $healthGain . "\n";
-    $clinicSummaryMsg .= "**Status:** " . ($clinicResult['treatment_successful'] ? ' Treatments applied' : ' Some treatments failed') . "\n\n";
-    $clinicSummaryMsg .= $clinicResult['ready_for_retry'] ? " Ready for retry" : " May need manual intervention";
-    
-    sendToChat('nurse', $clinicSummaryMsg, $clinicResult['treatment_successful'] ? 'success' : 'error');
+        
+        // Check if clinic was able to help
+        if (!$clinicResult['needs_treatment']) {
+            sendToChat('doctor', "✅ Patient health acceptable. No treatment required.", 'success');
+            sendToChat('scout94', "🔄 **Retrying tests...**", 'markdown');
+            continue; // Skip to next iteration
+        }
+        
+        // Report clinic results to chat
+        $healthGain = $clinicResult['final_health'] - $clinicResult['initial_health'];
+        $clinicSummaryMsg = "## 🏥 Clinic Treatment Complete\n\n";
+        $clinicSummaryMsg .= "**Initial Health:** " . $clinicResult['initial_health'] . "/100\n";
+        $clinicSummaryMsg .= "**Final Health:** " . $clinicResult['final_health'] . "/100\n";
+        $clinicSummaryMsg .= "**Health Gain:** +" . $healthGain . "\n";
+        $clinicSummaryMsg .= "**Status:** " . ($clinicResult['treatment_successful'] ? ' Treatments applied' : ' Some treatments failed') . "\n\n";
+        $clinicSummaryMsg .= $clinicResult['ready_for_retry'] ? " Ready for retry" : " May need manual intervention";
+        
+        sendToChat('nurse', $clinicSummaryMsg, $clinicResult['treatment_successful'] ? 'success' : 'error');
         
         // Secretary: Post treatment completion
         $clinicSecretary->treatmentComplete(
@@ -262,8 +262,9 @@ while ($attempt <= $maxRetries) {
         if (method_exists($clinic, 'discharge')) {
             $clinic->discharge();
         }
-    
-    sendToChat('scout94', " **Retrying tests with clinic improvements...**", 'markdown');
+        
+        sendToChat('scout94', "🔄 **Retrying tests with clinic improvements...**", 'markdown');
+    }
     
     // Continue to next iteration
 }
