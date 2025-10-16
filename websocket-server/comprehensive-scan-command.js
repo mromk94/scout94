@@ -15,7 +15,7 @@ import * as RootCauseTracer from './root-cause-tracer.js';
 import * as MarkdownReportGenerator from './markdown-report-generator.js';
 import { MockDetector, detectMockData } from './mock-detector.js';
 import containerizedTestRunner from './containerized-test-runner.js';
-import configManager from '../ui/src/utils/configManager.js';
+import configLoader from './config-loader.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -105,7 +105,7 @@ export async function handleComprehensiveScan(ws, broadcast) {
     
     // PHASE 2.5: Containerized Testing (if enabled)
     try {
-      const config = configManager.config;
+      const config = configLoader.getConfig();
       if (config.testEnvironment?.containerized) {
         const containerResults = await containerizedTestRunner.runContainerizedTests(
           config,
