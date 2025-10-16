@@ -1,0 +1,40 @@
+{
+  "$schema": "https://tauri.app/v2/schemas/config.schema.json",
+  "productName": "Scout94",
+  "version": "1.0.0",
+  "identifier": "com.scout94.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:3094",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["dmg", "app"],
+    "copyright": "© 2025 Scout94",
+    "category": "DeveloperTool",
+    "shortDescription": "Scout94 Testing Suite",
+    "longDescription": "Immersive AI-powered testing interface with 7 specialized agents",
+    "macOS": {
+      "minimumSystemVersion": "10.13"
+    }
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Scout94 Mission Control",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 1200,
+        "minHeight": 700,
+        "center": true,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  }
+}

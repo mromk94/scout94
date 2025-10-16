@@ -16,7 +16,7 @@ __pycache__/
 
 # Logs
 *.log
-.scout94.log
+
 
 # Temporary files
 tmp/
