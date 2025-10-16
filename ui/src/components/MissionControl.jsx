@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Rocket, Activity, MessageSquare, FileText, Play, Settings, Code, Camera, Square } from 'lucide-react';
+import { Rocket, Activity, MessageSquare, FileText, Play, Settings, Code, Camera, Square, FolderOpen } from 'lucide-react';
 import useWebSocket from '../hooks/useWebSocket';
 import CommandButtons from './CommandButtons';
 import ChatPane from './ChatPane';
@@ -19,6 +19,8 @@ export default function MissionControl() {
   const [screenshots, setScreenshots] = useState([]);
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [currentReportPath, setCurrentReportPath] = useState(null);
+  const [showProjectSelector, setShowProjectSelector] = useState(false);
+  const chatInputRef = React.useRef(null);
 
   useEffect(() => {
     localStorage.setItem('scout94_project_path', projectPath);
@@ -26,9 +28,17 @@ export default function MissionControl() {
 
   const handleProjectChange = (newPath) => {
     setProjectPath(newPath);
+    setShowProjectSelector(false);
     // Send project change to backend
     if (sendCommand && sendCommand.sendChat) {
       sendCommand.sendChat(`PROJECT_CHANGE:${newPath}`);
+    }
+  };
+  
+  const handleAgentClick = (agentId) => {
+    // Trigger @ mention in chat
+    if (chatInputRef.current) {
+      chatInputRef.current.insertAgentMention(`@${agentId}`);
     }
   };
 
@@ -106,50 +116,16 @@ export default function MissionControl() {
             </button>
           </div>
 
-          <div className="flex items-center gap-4">
-            <ProjectSelector 
-              currentProject={projectPath}
-              onProjectChange={handleProjectChange}
-            />
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${isConnected ? 'bg-green-600/20 border border-green-500/50' : 'bg-red-600/20 border border-red-500/50'}`}>
-              <Activity className={`w-4 h-4 ${isConnected ? 'text-green-400' : 'text-red-400'} ${isConnected ? 'animate-pulse' : ''}`} />
-              <span className="text-sm font-semibold">{isConnected ? 'Connected' : 'Disconnected'}</span>
-            </div>
-          </div>
-
-          {/* Run Controls */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              if (isRunning) {
-                clearMessages();
-              } else {
-                sendCommand('🚀 Run All Tests');
-              }
-            }}
-            disabled={!isConnected}
-            className={`px-6 py-2 rounded-lg font-semibold flex items-center gap-2 ${
-              !isConnected
-                ? 'bg-gray-600 cursor-not-allowed opacity-50'
-                : isRunning
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
-            }`}
+          {/* Project Selector Button */}
+          <button
+            onClick={() => setShowProjectSelector(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-lg font-semibold text-sm transition shadow-lg"
           >
-            {isRunning ? (
-              <>
-                <Square className="w-4 h-4 fill-white" />
-                Stop Test
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4 fill-white" />
-                Run Scout94
-              </>
-            )}
-          </motion.button>
+            <FolderOpen className="w-4 h-4" />
+            <span className="hidden md:inline">Change Project</span>
+          </button>
 
+          {/* Screenshot Button */}
           <button
             onClick={() => loadScreenshots()}
             className="p-2 hover:bg-white/10 rounded-lg transition"
@@ -157,20 +133,29 @@ export default function MissionControl() {
           >
             <Camera className="w-5 h-5" />
           </button>
+
+          {/* Connection Status */}
+          <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+            isConnected ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+          }`}>
+            {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
+          </div>
+
+          {/* Settings */}
           <button className="p-2 hover:bg-white/10 rounded-lg transition">
             <Settings className="w-5 h-5" />
           </button>
         </div>
       </header>
 
-      {/* Agent Status Bar */}
-      <AgentBar isRunning={isRunning} />
+      {/* Agent Status Bar - Hide when modal is open */}
+      {!showProjectSelector && <AgentBar isRunning={isRunning} onAgentClick={handleAgentClick} />}
 
       {/* Main Content Area - Split or Single View */}
       <div className="flex-1 flex overflow-hidden">
         {(activeTab === 'ide' || activeTab === 'split') && (
           <div className={activeTab === 'split' ? 'w-1/2 bg-slate-950/90 overflow-hidden' : 'w-full bg-slate-950/90 overflow-hidden'}>
-            <IDEPane isRunning={isRunning} messages={messages} />
+            <IDEPane isRunning={isRunning} messages={messages} projectPath={projectPath} />
           </div>
         )}
         
@@ -182,6 +167,7 @@ export default function MissionControl() {
         {(activeTab === 'chat' || activeTab === 'split') && (
           <div className={activeTab === 'split' ? 'w-1/2 bg-indigo-950/90 overflow-hidden' : 'w-full bg-indigo-950/90 overflow-hidden'}>
             <ChatPane 
+              ref={chatInputRef}
               isRunning={isRunning} 
               messages={messages} 
               sendCommand={sendCommand} 
@@ -201,7 +187,16 @@ export default function MissionControl() {
         )}
       </div>
 
-      {/* Screenshot Viewer Modal */}
+      {/* Project Selector Modal */}
+      {showProjectSelector && (
+        <ProjectSelector 
+          currentProject={projectPath}
+          onProjectChange={handleProjectChange}
+          onClose={() => setShowProjectSelector(false)}
+        />
+      )}
+
+      {/* Image Viewer Modal */}
       {showImageViewer && (
         <ImageViewer 
           screenshots={screenshots}

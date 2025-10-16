@@ -28,6 +28,63 @@ Agents online: 🚀 🩺 📊 📸 ⚙️ 🎨 💉
 const clients = new Set();
 const runningProcesses = new Map();
 
+// Graceful shutdown handling
+let isShuttingDown = false;
+
+function gracefulShutdown(signal) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  
+  console.log(`\n🛑 Received ${signal} - Starting graceful shutdown...`);
+  
+  // Stop accepting new connections
+  wss.close(() => {
+    console.log('✅ WebSocket server closed');
+  });
+  
+  // Kill all running processes
+  console.log(`🔪 Stopping ${runningProcesses.size} running processes...`);
+  runningProcesses.forEach((proc, ws) => {
+    try {
+      proc.kill('SIGTERM');
+      console.log(`  ✓ Killed process for client`);
+    } catch (err) {
+      console.error(`  ✗ Error killing process:`, err.message);
+    }
+  });
+  runningProcesses.clear();
+  
+  // Close all client connections
+  console.log(`👋 Disconnecting ${clients.size} clients...`);
+  clients.forEach(client => {
+    try {
+      client.close(1000, 'Server shutting down');
+    } catch (err) {
+      console.error(`  ✗ Error closing client:`, err.message);
+    }
+  });
+  clients.clear();
+  
+  console.log('✅ Graceful shutdown complete');
+  process.exit(0);
+}
+
+// Handle shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGHUP', () => gracefulShutdown('SIGHUP'));
+
+// Handle uncaught errors
+process.on('uncaughtException', (err) => {
+  console.error('💥 Uncaught Exception:', err);
+  gracefulShutdown('uncaughtException');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
+  gracefulShutdown('unhandledRejection');
+});
+
 wss.on('connection', (ws) => {
   clients.add(ws);
   console.log(`✅ Client connected. Total clients: ${clients.size}`);

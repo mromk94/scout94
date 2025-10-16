@@ -4,10 +4,17 @@
  */
 
 import * as AnalysisEngine from './analysis-engine.js';
+import { spawn } from 'child_process';
+import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { DuplicateAnalyzer, DuplicateResolver } from './duplicate-analyzer.js';
 import * as DeepAnalysis from './deep-analysis.js';
 import * as HolisticAnalyzer from './holistic-analyzer.js';
 import * as RootCauseTracer from './root-cause-tracer.js';
 import * as MarkdownReportGenerator from './markdown-report-generator.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export async function handleComprehensiveScan(ws, broadcast) {
   broadcast({

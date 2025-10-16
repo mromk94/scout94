@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ChatBubble from './ChatBubble_old';
 import CommandButtons from './CommandButtons';
@@ -6,14 +6,23 @@ import { Square } from 'lucide-react';
 
 const agents = ['doctor', 'auditor', 'screenshot', 'backend', 'frontend', 'nurse', 'scout94', 'everybody'];
 
-export default function ChatPane({ isRunning, messages, sendCommand, clearMessages }) {
+const ChatPane = forwardRef(({ isRunning, messages, sendCommand, clearMessages, onTestComplete }, ref) => {
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
   const [inputValue, setInputValue] = useState('');
   const [showMentions, setShowMentions] = useState(false);
   const [mentionFilter, setMentionFilter] = useState('');
   const [conversationMessages, setConversationMessages] = useState([]);
   const [isPaused, setIsPaused] = useState(false);
   const [conversationContext, setConversationContext] = useState([]);
+
+  // Expose method to insert agent mention
+  useImperativeHandle(ref, () => ({
+    insertAgentMention: (mention) => {
+      setInputValue(prev => prev + (prev ? ' ' : '') + mention + ' ');
+      inputRef.current?.focus();
+    }
+  }));
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -179,6 +188,7 @@ export default function ChatPane({ isRunning, messages, sendCommand, clearMessag
           
           <div className="flex gap-2">
             <input
+              ref={inputRef}
               type="text"
               value={inputValue}
               onChange={handleInputChange}
@@ -204,7 +214,9 @@ export default function ChatPane({ isRunning, messages, sendCommand, clearMessag
       </div>
     </div>
   );
-}
+});
+
+export default ChatPane;
 
 function MessageIcon({ className }) {
   return (

@@ -16,13 +16,17 @@ SyntaxHighlighter.registerLanguage('javascript', javascript);
 SyntaxHighlighter.registerLanguage('jsx', javascript);
 SyntaxHighlighter.registerLanguage('css', css);
 
-export default function IDEPane({ isRunning, messages }) {
-  const [expandedFolders, setExpandedFolders] = useState(['src', 'tests']);
-  const [selectedFile, setSelectedFile] = useState('tests/test_routing.php');
+export default function IDEPane({ isRunning, messages, projectPath }) {
+  const [expandedFolders, setExpandedFolders] = useState([]);
+  const [openTabs, setOpenTabs] = useState([]);
+  const [activeTabId, setActiveTabId] = useState(null);
   const [sidebarWidth, setSidebarWidth] = useState(280);
   const [isDragging, setIsDragging] = useState(false);
   const [markdownContent, setMarkdownContent] = useState(null);
   const [markdownFilePath, setMarkdownFilePath] = useState(null);
+  const [fileTree, setFileTree] = useState([]);
+  const [isLoadingTree, setIsLoadingTree] = useState(false);
+  const [fileContents, setFileContents] = useState({});
   
   // Listen for file display messages from WebSocket
   useEffect(() => {
@@ -39,56 +43,126 @@ export default function IDEPane({ isRunning, messages }) {
       const content = await invoke('read_file_content', { filePath });
       setMarkdownContent(content);
       setMarkdownFilePath(filePath);
-      setSelectedFile('ANALYSIS-REPORT.md'); // Switch to markdown view
+      
+      // Add markdown file as a new tab
+      const tabId = 'analysis_report';
+      const newTab = {
+        id: tabId,
+        path: filePath,
+        name: 'ANALYSIS-REPORT.md',
+        language: 'markdown',
+        isMarkdown: true
+      };
+      
+      setOpenTabs(prev => {
+        const exists = prev.find(t => t.id === tabId);
+        if (exists) return prev;
+        return [...prev, newTab];
+      });
+      setActiveTabId(tabId);
     } catch (error) {
       console.error('Failed to load markdown file:', error);
     }
   };
+  
+  const openFileInTab = (filePath, fileName, language) => {
+    const tabId = filePath.replace(/[^a-zA-Z0-9]/g, '_');
+    const newTab = {
+      id: tabId,
+      path: filePath,
+      name: fileName,
+      language: language || 'text'
+    };
+    
+    setOpenTabs(prev => {
+      const exists = prev.find(t => t.id === tabId);
+      if (exists) {
+        setActiveTabId(tabId);
+        return prev;
+      }
+      return [...prev, newTab];
+    });
+    setActiveTabId(tabId);
+  };
+  
+  const closeTab = (tabId, e) => {
+    e?.stopPropagation();
+    setOpenTabs(prev => {
+      const filtered = prev.filter(t => t.id !== tabId);
+      // If closing active tab, switch to last tab
+      if (activeTabId === tabId && filtered.length > 0) {
+        setActiveTabId(filtered[filtered.length - 1].id);
+      }
+      return filtered;
+    });
+  };
+  
+  const getActiveTab = () => {
+    return openTabs.find(t => t.id === activeTabId);
+  };
 
-  const fileTree = [
-    {
-      type: 'folder',
-      name: 'src',
-      children: [
-        { type: 'file', name: 'index.php', language: 'php' },
-        { type: 'file', name: 'config.php', language: 'php' },
-        {
-          type: 'folder',
-          name: 'components',
-          children: [
-            { type: 'file', name: 'Header.jsx', language: 'jsx' },
-            { type: 'file', name: 'Footer.jsx', language: 'jsx' },
-            { type: 'file', name: 'Dashboard.jsx', language: 'jsx' },
-          ],
-        },
-        {
-          type: 'folder',
-          name: 'styles',
-          children: [
-            { type: 'file', name: 'main.css', language: 'css' },
-            { type: 'file', name: 'components.css', language: 'css' },
-          ],
-        },
-      ],
-    },
-    {
-      type: 'folder',
-      name: 'tests',
-      children: [
-        { type: 'file', name: 'test_routing.php', language: 'php' },
-        { type: 'file', name: 'test_install_db.php', language: 'php' },
-        { type: 'file', name: 'test_user_journey_visitor.php', language: 'php' },
-        { type: 'file', name: 'test_user_journey_user.php', language: 'php' },
-      ],
-    },
-    { type: 'file', name: 'README.md', language: 'markdown' },
-    { type: 'file', name: 'package.json', language: 'javascript' },
-  ];
+  // Load real file tree from project directory
+  useEffect(() => {  
+    loadFileTree();
+  }, [projectPath]);
+  
+  const loadFileTree = async () => {
+    if (!projectPath) return;
+    
+    setIsLoadingTree(true);
+    try {
+      const tree = await invoke('read_directory_tree', { 
+        directoryPath: projectPath,
+        maxDepth: 4 
+      });
+      
+      // Convert from Rust format to component format
+      const convertedTree = tree.map(node => convertNode(node));
+      setFileTree(convertedTree);
+      
+      // Auto-expand first level folders
+      const topLevelFolders = tree
+        .filter(node => node.is_directory)
+        .map(node => node.path);
+      setExpandedFolders(topLevelFolders);
+    } catch (error) {
+      console.error('Failed to load file tree:', error);
+      setFileTree([]);
+    } finally {
+      setIsLoadingTree(false);
+    }
+  };
+  
+  const convertNode = (node) => {
+    return {
+      type: node.is_directory ? 'folder' : 'file',
+      name: node.name,
+      path: node.path,
+      language: node.language || 'text',
+      children: node.children ? node.children.map(child => convertNode(child)) : undefined
+    };
+  };
 
-  const toggleFolder = (folderName) => {
+  const toggleFolder = (folderPath) => {
     setExpandedFolders((prev) =>
-      prev.includes(folderName) ? prev.filter((f) => f !== folderName) : [...prev, folderName]
+      prev.includes(folderPath) ? prev.filter((f) => f !== folderPath) : [...prev, folderPath]
     );
+  };
+  
+  const loadFileContent = async (filePath) => {
+    // Check cache first
+    if (fileContents[filePath]) {
+      return fileContents[filePath];
+    }
+    
+    try {
+      const content = await invoke('read_file_content', { filePath });
+      setFileContents(prev => ({ ...prev, [filePath]: content }));
+      return content;
+    } catch (error) {
+      console.error('Failed to load file:', error);
+      return `// Error loading file: ${error}`;
+    }
   };
 
   const getFileIcon = (fileName) => {
@@ -101,39 +175,47 @@ export default function IDEPane({ isRunning, messages }) {
   };
 
   const renderFileTree = (items, depth = 0) => {
+    if (!items || items.length === 0) return null;
+    
     return items.map((item, index) => (
-      <div key={index}>
+      <div key={item.path || index}>
         {item.type === 'folder' ? (
           <>
             <div
-              onClick={() => toggleFolder(item.name)}
+              onClick={() => toggleFolder(item.path)}
               className="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer group"
               style={{ paddingLeft: `${depth * 12 + 12}px` }}
             >
-              {expandedFolders.includes(item.name) ? (
+              {expandedFolders.includes(item.path) ? (
                 <ChevronDown className="w-4 h-4 text-blue-400" />
               ) : (
                 <ChevronRight className="w-4 h-4 text-blue-400" />
               )}
               <FolderOpen className="w-4 h-4 text-yellow-400" />
               <span className="text-sm font-medium">{item.name}</span>
+              {item.children && (
+                <span className="text-xs text-gray-500 ml-auto">{item.children.length}</span>
+              )}
             </div>
-            {expandedFolders.includes(item.name) && item.children && (
+            {expandedFolders.includes(item.path) && item.children && (
               <div>{renderFileTree(item.children, depth + 1)}</div>
             )}
           </>
         ) : (
           <div
-            onClick={() => setSelectedFile(item.name)}
+            onClick={async () => {
+              const content = await loadFileContent(item.path);
+              openFileInTab(item.path, item.name, item.language);
+            }}
             className={`flex items-center gap-2 px-3 py-1.5 cursor-pointer group ${
-              selectedFile === item.name
+              openTabs.some(tab => tab.path === item.path && tab.id === activeTabId)
                 ? 'bg-blue-600/30 border-l-2 border-blue-500'
                 : 'hover:bg-white/5'
             }`}
             style={{ paddingLeft: `${depth * 12 + 28}px` }}
           >
             <span className="text-lg">{getFileIcon(item.name)}</span>
-            <span className="text-sm">{item.name}</span>
+            <span className="text-sm truncate">{item.name}</span>
           </div>
         )}
       </div>
@@ -175,11 +257,39 @@ export default function IDEPane({ isRunning, messages }) {
         className="bg-slate-900/80 border-r border-slate-700 flex flex-col flex-shrink-0"
         style={{ width: `${sidebarWidth}px` }}
       >
-        <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
-          <span className="font-semibold text-sm">📁 EXPLORER</span>
-          <Search className="w-4 h-4 text-gray-400 cursor-pointer hover:text-white" />
+        <div className="px-4 py-3 border-b border-white/10 flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-sm">📁 EXPLORER</span>
+            <button
+              onClick={loadFileTree}
+              className="p-1 hover:bg-white/10 rounded transition"
+              title="Refresh"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+          {projectPath && (
+            <div className="text-xs text-gray-400 truncate" title={projectPath}>
+              {projectPath.split('/').pop()}
+            </div>
+          )}
         </div>
-        <div className="flex-1 overflow-y-auto">{renderFileTree(fileTree)}</div>
+        <div className="flex-1 overflow-y-auto">
+          {isLoadingTree ? (
+            <div className="flex items-center justify-center h-32 text-gray-400">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          ) : fileTree.length === 0 ? (
+            <div className="p-4 text-center text-gray-400 text-sm">
+              No files found<br/>
+              <span className="text-xs">Select a project to explore</span>
+            </div>
+          ) : (
+            renderFileTree(fileTree)
+          )}
+        </div>
       </div>
 
       {/* Resize Handle */}
@@ -191,19 +301,41 @@ export default function IDEPane({ isRunning, messages }) {
       {/* Code Editor */}
       <div className="flex-1 flex flex-col bg-[#1e1e1e] overflow-hidden">
         {/* Tab Bar */}
-        <div className="flex items-center gap-1 bg-black/30 border-b border-white/10 px-2 py-1 flex-shrink-0">
-          <div className="px-4 py-2 bg-[#1e1e1e] text-sm flex items-center gap-2 rounded-t-md">
-            <span className="text-lg">{getFileIcon(selectedFile)}</span>
-            <span>{selectedFile}</span>
-          </div>
+        <div className="flex items-center gap-1 bg-black/30 border-b border-white/10 px-2 py-1 flex-shrink-0 overflow-x-auto">
+          {openTabs.map((tab) => (
+            <motion.div
+              key={tab.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              onClick={() => setActiveTabId(tab.id)}
+              className={`px-4 py-2 text-sm flex items-center gap-2 rounded-t-md cursor-pointer group min-w-[120px] max-w-[200px] ${
+                activeTabId === tab.id
+                  ? 'bg-[#1e1e1e] text-white'
+                  : 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <span className="text-lg flex-shrink-0">{getFileIcon(tab.name)}</span>
+              <span className="truncate flex-1">{tab.name}</span>
+              {openTabs.length > 1 && (
+                <button
+                  onClick={(e) => closeTab(tab.id, e)}
+                  className="opacity-0 group-hover:opacity-100 hover:bg-red-500/20 rounded p-0.5 transition"
+                >
+                  <XCircle className="w-4 h-4" />
+                </button>
+              )}
+            </motion.div>
+          ))}
         </div>
 
         {/* Code Content with Syntax Highlighting */}
         <div className="flex-1 overflow-auto">
           <CodePreview 
-            fileName={selectedFile} 
+            tab={getActiveTab()} 
             isRunning={isRunning} 
-            markdownContent={markdownContent}
+            markdownContent={activeTabId === 'analysis_report' ? markdownContent : null}
+            fileContents={fileContents}
           />
         </div>
       </div>
@@ -211,7 +343,12 @@ export default function IDEPane({ isRunning, messages }) {
   );
 }
 
-function CodePreview({ fileName, isRunning, markdownContent }) {
+function CodePreview({ tab, isRunning, markdownContent, fileContents }) {
+  if (!tab) return <div className="flex items-center justify-center h-full text-gray-400">No file selected</div>;
+  
+  const fileName = tab.name;
+  const fileContent = tab.path ? fileContents[tab.path] : null;
+  
   // If we have markdown content, render it
   if (markdownContent) {
     return (

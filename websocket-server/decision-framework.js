@@ -3,6 +3,8 @@
  * Prevents lazy shortcuts and ensures proper problem-solving
  */
 
+import { DuplicateAnalyzer, DuplicateResolver } from './duplicate-analyzer.js';
+
 /**
  * Decision Quality Validator
  * Evaluates if a proposed solution is a proper fix or a lazy shortcut
@@ -62,7 +64,25 @@ export class DecisionValidator {
       analysis.reasoning.push('User satisfaction requires completing their actual request');
     }
     
+    // Check 6: Is this deleting a duplicate without analysis?
+    if (this.isDuplicateDeletionWithoutAnalysis(proposedSolution)) {
+      analysis.quality = 'BAD';
+      analysis.warnings.push('UNANALYZED_DUPLICATE: Deleting duplicate code without understanding both versions');
+      analysis.alternatives.push('Use DuplicateAnalyzer to compare features and merge intelligently');
+      analysis.reasoning.push('Every duplicate exists for a reason - understand before deleting');
+    }
+    
     return analysis;
+  }
+  
+  /**
+   * Check if deleting a duplicate without proper analysis
+   */
+  static isDuplicateDeletionWithoutAnalysis(solution) {
+    const hasDuplicateMention = /duplicate|duplicated|same.*function|repeated/i.test(solution.description || '');
+    const hasAnalysis = /analyzed|compared|merged|features|both versions/i.test(solution.description || '');
+    
+    return hasDuplicateMention && !hasAnalysis;
   }
   
   /**
@@ -290,7 +310,11 @@ export const DECISION_RULES = {
     'Complete features that were explicitly requested',
     'Fix root causes, not symptoms',
     'Think through consequences before deleting code',
-    'Verify if feature is needed before removing it'
+    'Verify if feature is needed before removing it',
+    'Analyze BOTH versions of duplicate code before deciding',
+    'Compare features and understand intent behind each duplicate',
+    'Merge features when both duplicates have unique value',
+    'Never destroy intentional work without investigation'
   ],
   
   // NEVER do these
@@ -324,12 +348,32 @@ export const DECISION_RULES = {
     'Am I fixing the root cause or just hiding the symptom?',
     'Am I deleting something that was explicitly requested?',
     'Is this the lazy way out?',
-    'Will this frustrate the user?'
-  ]
+    'Will this frustrate the user?',
+    'Have I analyzed both duplicates if deleting one?'
+  ],
+  
+  // Duplicate code handling
+  DUPLICATE_HANDLING: {
+    step1: 'Identify that duplicates exist (same function/class name)',
+    step2: 'Extract features from BOTH versions',
+    step3: 'Compare: parameters, return types, functionality, complexity',
+    step4: 'Understand WHY both exist (ongoing dev, different use cases, evolution)',
+    step5: 'Decision Matrix:',
+    decisions: {
+      keepFirst: 'If Version 1 is superset of Version 2',
+      keepSecond: 'If Version 2 is superset of Version 1',
+      merge: 'If both have unique valuable features',
+      removeDuplicate: 'Only if truly identical with no differences'
+    },
+    philosophy: 'Nobody writes code for no reason. Every duplicate has intent behind it.',
+    tools: 'Use DuplicateAnalyzer.analyzeDuplicates() before making decisions'
+  }
 };
 
 export default {
   DecisionValidator,
   ProperSolutionFramework,
-  DECISION_RULES
+  DECISION_RULES,
+  DuplicateAnalyzer,
+  DuplicateResolver
 };

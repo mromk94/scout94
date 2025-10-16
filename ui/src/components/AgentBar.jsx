@@ -11,7 +11,13 @@ const agents = [
   { id: 'nurse', name: 'Nurse', emoji: '💉', color: 'bg-nurse-pink', role: 'Healing' },
 ];
 
-export default function AgentBar({ isRunning }) {
+export default function AgentBar({ isRunning, onAgentClick }) {
+  const handleAgentClick = (agentId) => {
+    if (onAgentClick) {
+      onAgentClick(agentId);
+    }
+  };
+
   return (
     <div className="glassmorphism-dark border-b border-white/10 px-6 py-3">
       <div className="flex items-center gap-4 overflow-x-auto">
@@ -22,6 +28,9 @@ export default function AgentBar({ isRunning }) {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
+            onClick={() => handleAgentClick(agent.id)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full glassmorphism hover:bg-white/10 transition cursor-pointer group"
           >
             <motion.span

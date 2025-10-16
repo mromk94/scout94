@@ -4,7 +4,7 @@
  */
 
 import * as AnalysisEngine from './analysis-engine.js';
-import { DecisionValidator, ProperSolutionFramework, DECISION_RULES } from './decision-framework.js';
+import { DecisionValidator, ProperSolutionFramework, DECISION_RULES, DuplicateAnalyzer, DuplicateResolver } from './decision-framework.js';
 
 // Project knowledge base - actual paths and structure
 const PROJECT_KNOWLEDGE = {
@@ -58,6 +58,47 @@ class AIAgent {
     this.projectKnowledge.testReports = `${newPath}/test-reports`;
     this.projectKnowledge.testFiles = `${newPath}/tests/`;
     console.log(`🤖 AI Agent knowledge updated for: ${newPath}`);
+  }
+
+  /**
+   * Analyze duplicate code before making decisions
+   */
+  async analyzeDuplicates(code1, code2, context) {
+    console.log(`\n🔍 ${this.name}: Analyzing duplicate code...`);
+    
+    try {
+      const analysis = DuplicateAnalyzer.analyzeDuplicates(code1, code2);
+      
+      const response = {
+        agent: this.name,
+        analysis: analysis,
+        recommendation: analysis.recommendation,
+        reasoning: [
+          `I found duplicates in: ${context}`,
+          `Version 1 features: ${analysis.duplicate1.features.join(', ')}`,
+          `Version 2 features: ${analysis.duplicate2.features.join(', ')}`,
+          `Unique to V1: ${analysis.comparison.uniqueToFirst.join(', ') || 'none'}`,
+          `Unique to V2: ${analysis.comparison.uniqueToSecond.join(', ') || 'none'}`,
+          ``,
+          `📊 Recommendation: ${analysis.recommendation.action}`,
+          `Reason: ${analysis.recommendation.reason}`,
+          ``,
+          `Remember: Every duplicate exists for a reason. Understanding both versions prevents destroying intentional work.`
+        ].join('\n')
+      };
+      
+      return response;
+    } catch (error) {
+      console.error(`❌ ${this.name}: Error analyzing duplicates:`, error);
+      return {
+        agent: this.name,
+        error: error.message,
+        recommendation: {
+          action: 'INVESTIGATE',
+          reason: 'Could not analyze automatically - manual review needed'
+        }
+      };
+    }
   }
 
   addToHistory(role, content) {
