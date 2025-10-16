@@ -25,28 +25,34 @@ pub struct FileNode {
 pub async fn run_scout94_test(project_path: String, test_type: String) -> Result<TestResult, String> {
     println!("🚀 Running REAL Scout94 test: {} on {}", test_type, project_path);
     
-    // Use the actual test runner in the Viz Venture Group project
-    let test_runner_path = format!("{}/tests/scout94_test_runner.php", project_path);
+    // Get Scout94 directory (parent of CascadeProjects)
+    let home_dir = std::env::var("HOME").unwrap_or_else(|_| "/Users/mac".to_string());
+    let scout94_dir = format!("{}/CascadeProjects/scout94", home_dir);
     
-    // Verify the test runner exists
-    if !Path::new(&test_runner_path).exists() {
-        return Err(format!("Test runner not found at: {}", test_runner_path));
-    }
-    
-    // Map test types to appropriate test names
-    let test_name = match test_type.as_str() {
-        "routing" => "auth",
-        "visitor" | "user" => "investment",
-        "audit" => "security",
-        "database" => "database",
-        _ => "all",
+    // Map test types to Scout94's test scripts
+    let test_script = match test_type.as_str() {
+        "routing" => "test_routing.php",
+        "visitor" => "test_user_journey_visitor.php",
+        "user" => "test_user_journey_user.php",
+        "admin" => "test_user_journey_admin.php",
+        "database" => "test_install_db.php",
+        "audit" => "run_with_audit.php",
+        "all" => "run_all_tests.php",
+        _ => "run_all_tests.php",
     };
     
-    println!("📋 Executing: php {} {}", test_runner_path, test_name);
+    let test_runner_path = format!("{}/{}", scout94_dir, test_script);
+    
+    // Verify Scout94 test script exists
+    if !Path::new(&test_runner_path).exists() {
+        return Err(format!("❌ Test script not found: {}\n\nScout94 tests should be in: {}", test_runner_path, scout94_dir));
+    }
+    
+    println!("📋 Executing: php {} (from Scout94 directory)", test_script);
+    println!("📁 Target project: {}", project_path);
     
     let output = Command::new("php")
         .arg(&test_runner_path)
-        .arg(test_name)
         .current_dir(&project_path)
         .output();
     

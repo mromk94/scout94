@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod commands;
+mod remote_scanner;
 
 use std::process::{Command, Child};
 use std::sync::Mutex;
@@ -37,6 +38,9 @@ fn main() {
             commands::execute_command,
             commands::list_directory,
             commands::read_directory_tree,
+            remote_scanner::deploy_scanner_remote,
+            remote_scanner::run_scout94_remote,
+            remote_scanner::check_remote_access
         ])
         .setup(|_app| {
             println!("✅ Scout94 Mission Control started!");

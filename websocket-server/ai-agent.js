@@ -44,6 +44,14 @@ class AIAgent {
     this.conversationHistory = [];
     this.maxHistory = 20;
     this.projectKnowledge = PROJECT_KNOWLEDGE;
+    this.context = {
+      recentMessages: [],
+      currentProject: null,
+      testResults: [],
+      decisionRules: DECISION_RULES,
+      accountabilityProtocol: ACCOUNTABILITY_SYSTEM_PROMPT, // INJECTED INTO EVERY AGENT
+      mustFollowAccountability: true // FLAG: This is non-negotiable
+    };
   }
 
   updateProjectPath(newPath) {
@@ -110,6 +118,43 @@ class AIAgent {
 
   getContext() {
     return this.conversationHistory.slice(-5).map(h => `${h.role}: ${h.content}`).join('\n');
+  }
+  
+  /**
+   * Get full system prompt for LLM (includes mandatory accountability protocol)
+   */
+  getSystemPromptForLLM() {
+    const missions = {
+      scout94: 'Coordinate comprehensive testing and analysis. You are the primary coordinator.',
+      doctor: 'Diagnose issues with precision. Focus on root causes, not symptoms.',
+      auditor: 'Review code quality and security. Be thorough and detail-oriented.',
+      screenshot: 'Capture visual evidence of issues. Document what you see.',
+      backend: 'Analyze backend code, APIs, and database operations.',
+      frontend: 'Analyze UI/UX code, components, and user interactions.',
+      nurse: 'Monitor system health and provide proactive recommendations.'
+    };
+    
+    const mission = missions[this.name] || 'Assist with testing and analysis.';
+    
+    return `# SYSTEM INSTRUCTIONS FOR ${this.name.toUpperCase()}
+
+## Your Role
+You are **${this.name}**, a ${this.role} AI agent with a ${this.personality} personality.
+
+## Your Mission
+${mission}
+
+${this.context.accountabilityProtocol}
+
+---
+
+## Additional Context
+- Recent Activity: ${this.conversationHistory.length} messages
+- Current Project: ${this.projectKnowledge.projectPath || 'Not set'}
+- Decision Rules: Active and enforced
+
+**REMEMBER:** You MUST follow the ACCOUNTABILITY PROTOCOL above.
+Your responses will be validated. Non-compliant solutions will be BLOCKED.`;
   }
 
   // Extract intent from user message using deeper NLP-like analysis
@@ -994,6 +1039,40 @@ export async function handleAIConversation(message, mentionedAgent = null, testC
    * Prevents lazy shortcuts and ensures proper problem-solving
    */
   function validateProposedSolution(problem, solution) {
+    // STEP 1: Enforce accountability FIRST (blocks if checks fail)
+    console.log('🛡️ ACCOUNTABILITY ENFORCEMENT ACTIVE');
+    
+    const accountabilityAction = {
+      type: 'proposed_solution',
+      description: solution.description,
+      isCodeChange: solution.involves_code_change || false,
+      isDelete: solution.involves_deletion || false,
+      isFix: true,
+      rootCauseAnalysis: solution.root_cause_analysis || null,
+      investigationEvidence: solution.investigation_steps || [],
+      systemContext: solution.system_context || null,
+      confirmedRootCause: solution.confirmed_root_cause || false
+    };
+    
+    // Import AccountabilityEnforcer
+    const { AccountabilityEnforcer } = require('./accountability-enforcer.js');
+    const accountabilityCheck = AccountabilityEnforcer.enforceAccountability(accountabilityAction);
+    
+    if (!accountabilityCheck.allowed) {
+      console.error('❌ ACCOUNTABILITY GATE BLOCKED SOLUTION');
+      return {
+        approved: false,
+        blocked: true,
+        quality: 'BLOCKED_BY_ACCOUNTABILITY',
+        reason: accountabilityCheck.reason,
+        requiredSteps: accountabilityCheck.requiredSteps,
+        message: accountabilityCheck.message
+      };
+    }
+    
+    console.log('✅ Accountability checks passed, proceeding to quality validation...');
+    
+    // STEP 2: Quality validation (after accountability passes)
     const validation = DecisionValidator.validateSolution(problem, solution);
     
     if (validation.quality === 'BAD' || validation.quality === 'CRITICAL') {
@@ -1013,7 +1092,7 @@ export async function handleAIConversation(message, mentionedAgent = null, testC
     return {
       approved: true,
       quality: 'GOOD',
-      reasoning: 'Solution follows proper problem-solving methodology'
+      reasoning: 'Solution follows proper problem-solving methodology and passed accountability gates'
     };
   }
 

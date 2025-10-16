@@ -1,5 +1,4 @@
 {
-  "$schema": "https://tauri.app/v2/schemas/config.schema.json",
   "productName": "Scout94",
   "version": "1.0.0",
   "identifier": "com.scout94.app",
@@ -34,7 +33,8 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": ["default"]
     }
   }
 }

@@ -1,5 +1,10 @@
 # Scout94 Testing Scripts
 
+> 🛡️ **ACCOUNTABILITY PROTOCOL ENFORCED**  
+> All actions in this ecosystem are gated by mandatory accountability checks.  
+> See `websocket-server/ACCOUNTABILITY_PROTOCOL.md` and `accountability-enforcer.js`  
+> **NO action proceeds without root cause investigation.**
+
 This directory contains all automated testing scripts used by the Scout94 scanning protocol.
 
 **Location:** `/Users/mac/CascadeProjects/scout94/` (shared across all projects)

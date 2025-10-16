@@ -21,6 +21,11 @@ console.log(`
 ✅ Real PHP test execution enabled
 ✅ Ready to broadcast to UI clients
 
+🛡️  ACCOUNTABILITY PROTOCOL: ACTIVE & ENFORCED
+    - All agents must follow accountability gates
+    - Solutions validated before execution
+    - Non-compliant actions will be BLOCKED
+
 Agents online: 🚀 🩺 📊 📸 ⚙️ 🎨 💉
 `);
 
