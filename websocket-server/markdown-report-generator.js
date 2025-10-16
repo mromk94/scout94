@@ -18,11 +18,19 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
   const { rootCauses, impactAnalysis } = rootCauseAnalysis;
   
   // Extract actual values from results object structure
-  const securityIssues = results.scans?.securityAnalysis?.totalIssues || 0;
-  const performanceIssues = results.scans?.performanceAnalysis?.metrics?.slowQueries || 0;
-  const qualityIssues = results.deepAnalysis?.codeQuality?.reduce((sum, r) => sum + (r.issues?.length || 0), 0) || 0;
-  const errors = results.scans?.errorAnalysis?.summary?.totalErrors || 0;
-  const totalFiles = results.scans?.projectIndex?.summary?.totalFiles || 0;
+  // FIX: Correct paths based on actual comprehensive scan structure
+  const securityIssues = (results.securityScan?.vulnerabilities?.length || 0);
+  const performanceIssues = (results.deepAnalysis?.performance?.filter(p => p.issues?.length > 0).length || 0);
+  const qualityIssues = (results.deepAnalysis?.codeQuality?.reduce((sum, r) => sum + (r.issues?.length || 0), 0) || 0);
+  const errors = (results.scans?.errorAnalysis?.summary?.totalErrors || 0);
+  const totalFiles = (results.scans?.projectIndex?.summary?.totalFiles || 0);
+  
+  // Ensure all values are numbers, not undefined/NaN
+  const safeSecurityIssues = Number.isFinite(securityIssues) ? securityIssues : 0;
+  const safePerformanceIssues = Number.isFinite(performanceIssues) ? performanceIssues : 0;
+  const safeQualityIssues = Number.isFinite(qualityIssues) ? qualityIssues : 0;
+  const safeErrors = Number.isFinite(errors) ? errors : 0;
+  const safeTotalFiles = Number.isFinite(totalFiles) ? totalFiles : 0;
   
   let markdown = '';
   
@@ -42,8 +50,8 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
   // ============================================
   markdown += `## 📊 Executive Summary\n\n`;
   
-  const totalIssues = securityIssues + performanceIssues + qualityIssues + errors;
-  const healthScore = calculateHealthScore(securityIssues, performanceIssues, qualityIssues, errors);
+  const totalIssues = safeSecurityIssues + safePerformanceIssues + safeQualityIssues + safeErrors;
+  const healthScore = calculateHealthScore(safeSecurityIssues, safePerformanceIssues, safeQualityIssues, safeErrors);
   
   markdown += `### Overall Health Score: ${healthScore}%\n\n`;
   
@@ -52,9 +60,9 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
   markdown += `| **Total Issues Found** | ${totalIssues} | ${totalIssues > 50 ? '🔴 Critical' : totalIssues > 20 ? '🟡 Warning' : '🟢 Good'} |\n`;
   markdown += `| **Root Causes Identified** | ${rootCauses.length} | ${rootCauses.length > 5 ? '🔴' : '🟢'} |\n`;
   markdown += `| **Critical Issues** | ${impactAnalysis.criticalCount} | ${impactAnalysis.criticalCount > 0 ? '🔴 Immediate Action Required' : '🟢'} |\n`;
-  markdown += `| **Files Analyzed** | ${totalFiles} | 📁 |\n`;
-  markdown += `| **Security Vulnerabilities** | ${securityIssues} | ${securityIssues > 10 ? '🔴 High Risk' : securityIssues > 0 ? '🟡' : '🟢'} |\n`;
-  markdown += `| **Performance Issues** | ${performanceIssues} | ${performanceIssues > 10 ? '🟡' : '🟢'} |\n\n`;
+  markdown += `| **Files Analyzed** | ${safeTotalFiles} | 📁 |\n`;
+  markdown += `| **Security Vulnerabilities** | ${safeSecurityIssues} | ${safeSecurityIssues > 10 ? '🔴 High Risk' : safeSecurityIssues > 0 ? '🟡' : '🟢'} |\n`;
+  markdown += `| **Performance Issues** | ${safePerformanceIssues} | ${safePerformanceIssues > 10 ? '🟡' : '🟢'} |\n\n`;
   
   markdown += `### 🎯 Cascade Risk Assessment: **${impactAnalysis.cascadeRisk}**\n\n`;
   

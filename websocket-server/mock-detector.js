@@ -21,6 +21,9 @@ export class MockDetector {
     this.mockIndicators = [];
     this.confidence = 100;
     
+    // 0. Check for NaN, undefined, null values (CRITICAL)
+    this.checkForInvalidValues(results);
+    
     // 1. Check if core scans actually ran
     this.checkProjectIndex(results.scans?.projectIndex);
     this.checkErrorAnalysis(results.scans?.errorAnalysis);
@@ -47,6 +50,39 @@ export class MockDetector {
       indicators: this.mockIndicators,
       verdict: this.getVerdict()
     };
+  }
+
+  /**
+   * Check for NaN, undefined, null values in critical fields
+   * These indicate calculation errors or missing data
+   */
+  checkForInvalidValues(results) {
+    const criticalFields = [
+      { path: 'scans.projectIndex.summary.totalFiles', name: 'Total Files' },
+      { path: 'scans.errorAnalysis.summary.totalErrors', name: 'Total Errors' },
+      { path: 'securityScan.vulnerabilities', name: 'Security Vulnerabilities' },
+      { path: 'deepAnalysis.codeQuality', name: 'Code Quality Results' },
+      { path: 'deepAnalysis.performance', name: 'Performance Results' }
+    ];
+
+    for (const field of criticalFields) {
+      const value = this.getNestedValue(results, field.path);
+      
+      if (value === undefined) {
+        this.addIndicator('UNDEFINED_VALUE', `${field.name} is undefined (not calculated)`, 12);
+      } else if (value === null) {
+        this.addIndicator('NULL_VALUE', `${field.name} is null (scan may have failed)`, 10);
+      } else if (typeof value === 'number' && isNaN(value)) {
+        this.addIndicator('NAN_VALUE', `${field.name} is NaN (calculation error)`, 15);
+      }
+    }
+  }
+
+  /**
+   * Get nested value from object using dot notation
+   */
+  getNestedValue(obj, path) {
+    return path.split('.').reduce((current, key) => current?.[key], obj);
   }
 
   checkProjectIndex(scan) {

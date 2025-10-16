@@ -16,6 +16,7 @@ import * as MarkdownReportGenerator from './markdown-report-generator.js';
 import { MockDetector, detectMockData } from './mock-detector.js';
 import containerizedTestRunner from './containerized-test-runner.js';
 import configLoader from './config-loader.js';
+import { UniversalTestRunner } from './universal-test-runner.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -102,6 +103,33 @@ export async function handleComprehensiveScan(ws, broadcast) {
       text: `🔬 Root cause analysis complete!\n- ${rootCauseAnalysis.rootCauses.length} root causes identified\n- Cascade risk: ${rootCauseAnalysis.impactAnalysis.cascadeRisk}`,
       timestamp: new Date().toISOString()
     });
+    
+    // PHASE 2.4: Universal Testing (detect and test any project type)
+    try {
+      broadcast({
+        type: 'message',
+        agent: 'scout94',
+        text: '🧪 Running universal tests (auto-detecting project type)...',
+        timestamp: new Date().toISOString()
+      });
+      
+      const universalRunner = new UniversalTestRunner(PROJECT_PATH);
+      const universalResults = await universalRunner.runTests();
+      results.universalTests = universalResults;
+      
+      // Format and broadcast results
+      const testSummary = universalRunner.formatResults(universalResults);
+      broadcast({
+        type: 'message',
+        agent: 'scout94',
+        text: '```\n' + testSummary + '\n```',
+        contentType: 'markdown',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Universal testing error:', error);
+      results.universalTests = { error: error.message };
+    }
     
     // PHASE 2.5: Containerized Testing (if enabled)
     try {
