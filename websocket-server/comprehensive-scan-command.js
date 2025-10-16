@@ -14,6 +14,8 @@ import * as HolisticAnalyzer from './holistic-analyzer.js';
 import * as RootCauseTracer from './root-cause-tracer.js';
 import * as MarkdownReportGenerator from './markdown-report-generator.js';
 import { MockDetector, detectMockData } from './mock-detector.js';
+import containerizedTestRunner from './containerized-test-runner.js';
+import configManager from '../ui/src/utils/configManager.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -100,6 +102,23 @@ export async function handleComprehensiveScan(ws, broadcast) {
       text: `🔬 Root cause analysis complete!\n- ${rootCauseAnalysis.rootCauses.length} root causes identified\n- Cascade risk: ${rootCauseAnalysis.impactAnalysis.cascadeRisk}`,
       timestamp: new Date().toISOString()
     });
+    
+    // PHASE 2.5: Containerized Testing (if enabled)
+    try {
+      const config = configManager.config;
+      if (config.testEnvironment?.containerized) {
+        const containerResults = await containerizedTestRunner.runContainerizedTests(
+          config,
+          PROJECT_PATH,
+          broadcast
+        );
+        results.containerizedTests = containerResults;
+      }
+    } catch (error) {
+      // Don't fail the whole scan if containerized testing fails
+      console.error('Containerized testing error:', error);
+      results.containerizedTests = { error: error.message };
+    }
     
     // MOCK DETECTION - Check data authenticity
     broadcast({
