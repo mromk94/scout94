@@ -204,8 +204,10 @@ export default function IDEPane({ isRunning, messages, projectPath }) {
         ) : (
           <div
             onClick={async () => {
-              const content = await loadFileContent(item.path);
+              // Open tab first for immediate feedback
               openFileInTab(item.path, item.name, item.language);
+              // Then load content in background
+              await loadFileContent(item.path);
             }}
             className={`flex items-center gap-2 px-3 py-1.5 cursor-pointer group ${
               openTabs.some(tab => tab.path === item.path && tab.id === activeTabId)
@@ -329,6 +331,35 @@ export default function IDEPane({ isRunning, messages, projectPath }) {
           ))}
         </div>
 
+        {/* File Path Breadcrumb Display */}
+        {getActiveTab() && (
+          <div className="px-4 py-2.5 bg-gradient-to-r from-slate-900/80 to-slate-800/60 border-b border-blue-500/20 flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <FolderOpen className="w-4 h-4 text-blue-400 flex-shrink-0" />
+              <div className="flex items-center gap-1.5 min-w-0 text-xs overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                {getActiveTab().path.split('/').filter(p => p).map((part, idx, arr) => (
+                  <React.Fragment key={idx}>
+                    <span className={idx === arr.length - 1 
+                      ? "text-blue-300 font-medium px-2 py-1 bg-blue-500/10 rounded whitespace-nowrap" 
+                      : "text-gray-400 hover:text-gray-200 transition whitespace-nowrap"
+                    }>
+                      {part}
+                    </span>
+                    {idx < arr.length - 1 && (
+                      <ChevronRight className="w-3 h-3 text-gray-600 flex-shrink-0" />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-500 flex-shrink-0">
+              <span className="px-2 py-0.5 bg-slate-700/50 rounded">
+                {getActiveTab().language}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Code Content with Syntax Highlighting */}
         <div className="flex-1 overflow-auto">
           <CodePreview 
@@ -357,7 +388,12 @@ function CodePreview({ tab, isRunning, markdownContent, fileContents }) {
         animate={{ opacity: 1 }} 
         className="h-full overflow-auto p-8 bg-[#1e1e1e]"
       >
-        <div className="max-w-4xl mx-auto prose prose-invert prose-slate">
+        <div className="max-w-5xl mx-auto prose prose-lg prose-invert prose-slate"
+          style={{
+            fontSize: '16px',
+            lineHeight: '1.8'
+          }}
+        >
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]}
             components={{
@@ -368,12 +404,21 @@ function CodePreview({ tab, isRunning, markdownContent, fileContents }) {
                     language={match[1]}
                     style={atomOneDark}
                     PreTag="div"
+                    wrapLines={true}
+                    wrapLongLines={true}
+                    customStyle={{
+                      fontSize: '15px',
+                      lineHeight: '1.7',
+                      padding: '1.5rem',
+                      borderRadius: '8px',
+                      margin: '1rem 0'
+                    }}
                     {...props}
                   >
                     {String(children).replace(/\n$/, '')}
                   </SyntaxHighlighter>
                 ) : (
-                  <code className={className} {...props}>
+                  <code className={`${className} px-1.5 py-0.5 bg-slate-800 rounded text-sm`} {...props}>
                     {children}
                   </code>
                 );
@@ -410,269 +455,111 @@ function CodePreview({ tab, isRunning, markdownContent, fileContents }) {
     );
   }
   
-  const codeExamples = {
-    'test_routing.php': {
-      code: `<?php
-// Scout94 - Routing Test
-echo "🔍 Testing all routes...\\n\\n";
-
-$routes = [
-    '/' => 'Home',
-    '/login' => 'Login',
-    '/register' => 'Register',
-    '/dashboard' => 'Dashboard',
-    '/invest' => 'Invest'
-];
-
-foreach ($routes as $path => $name) {
-    $response = testRoute($path);
-    echo $response['status'] === 200 
-        ? "✅ $name ($path) - PASSED\\n"
-        : "❌ $name ($path) - FAILED\\n";
-}`,
-      language: 'php',
-    },
-    'test_install_db.php': {
-      code: `<?php
-// Scout94 - Database Installation Test
-echo "📊 Testing database installation...\\n\\n";
-
-// Test database connection
-try {
-    $pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');
-    echo "✅ Database connection: PASSED\\n";
-} catch (PDOException $e) {
-    echo "❌ Database connection: FAILED\\n";
-    exit(1);
-}
-
-// Test tables
-$tables = ['users', 'investments', 'transactions'];
-foreach ($tables as $table) {
-    $result = $pdo->query("SHOW TABLES LIKE '$table'")->fetch();
-    echo $result ? "✅ Table $table: EXISTS\\n" : "❌ Table $table: MISSING\\n";
-}`,
-      language: 'php',
-    },
-    'test_user_journey_visitor.php': {
-      code: `<?php
-// Scout94 - Visitor Journey Test
-echo "👥 Testing visitor user journey...\\n\\n";
-
-$steps = [
-    'Visit homepage' => '/',
-    'View investment page' => '/invest',
-    'Navigate to register' => '/register',
-    'Submit registration' => '/auth/register'
-];
-
-foreach ($steps as $step => $path) {
-    echo "Testing: $step...\\n";
-    $response = testUserAction($path);
-    echo $response['success'] ? "✅ $step: PASSED\\n" : "❌ $step: FAILED\\n";
-}`,
-      language: 'php',
-    },
-    'index.php': {
-      code: `<?php
-require_once 'config.php';
-
-// Main application entry point
-session_start();
-
-// Load router
-require_once 'router.php';
-
-// Initialize application
-$app = new Application();
-$app->run();`,
-      language: 'php',
-    },
-    'config.php': {
-      code: `<?php
-// Application Configuration
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'viz_venture');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-
-define('BASE_URL', 'http://localhost');
-define('DEBUG_MODE', true);
-
-// Error reporting
-if (DEBUG_MODE) {
-    error_reporting(E_ALL);
-    ini_set('display_errors', 1);
-}`,
-      language: 'php',
-    },
-    'Header.jsx': {
-      code: `import React from 'react';
-import { Link } from 'react-router-dom';
-
-export default function Header() {
-  return (
-    <header className="bg-gradient-to-r from-blue-600 to-purple-600">
-      <nav className="container mx-auto px-4 py-4">
-        <Link to="/" className="text-2xl font-bold text-white">
-          Viz Venture Group
-        </Link>
-      </nav>
-    </header>
-  );
-}`,
-      language: 'jsx',
-    },
-    'Footer.jsx': {
-      code: `import React from 'react';
-
-export default function Footer() {
-  return (
-    <footer className="bg-slate-900 py-8 mt-auto">
-      <div className="container mx-auto px-4 text-center">
-        <p className="text-gray-400">
-          © 2025 Viz Venture Group. All rights reserved.
-        </p>
+  // Show loading state if content isn't loaded yet or is empty
+  if (!fileContent || fileContent.trim() === '') {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-gray-400">
+        {!fileContent ? (
+          <>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <div>Loading {fileName}...</div>
+          </>
+        ) : (
+          <>
+            <div className="text-6xl mb-4">📄</div>
+            <div className="text-lg">Empty File</div>
+            <div className="text-sm text-gray-500 mt-2">{fileName} has no content</div>
+          </>
+        )}
       </div>
-    </footer>
-  );
-}`,
-      language: 'jsx',
-    },
-    'Dashboard.jsx': {
-      code: `import React, { useState, useEffect } from 'react';
-
-export default function Dashboard() {
-  const [investments, setInvestments] = useState([]);
-  
-  useEffect(() => {
-    fetch('/api/investments')
-      .then(res => res.json())
-      .then(data => setInvestments(data));
-  }, []);
-
-  return (
-    <div className="dashboard">
-      <h1>My Investments</h1>
-      <div>
-        {/* Investment list will appear here */}
-        <p>Total Investments: {investments.length}</p>
-      </div>
-    </div>
-  );
-}`,
-      language: 'jsx',
-    },
-    'main.css': {
-      code: `/* Main Styles */
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(to bottom, #1e293b, #0f172a);
-  color: white;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.investment-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-}`,
-      language: 'css',
-    },
-    'README.md': {
-      code: `# Viz Venture Group
-
-Investment platform for modern investors.
-
-## Features
-- User registration and authentication
-- Investment portfolio tracking
-- Real-time market data
-- Secure transactions
-
-## Getting Started
-\`\`\`bash
-npm install
-npm run dev
-\`\`\`
-
-## Testing
-Run Scout94 tests:
-\`\`\`bash
-php test_routing.php
-php test_user_journey_visitor.php
-\`\`\``,
-      language: 'markdown',
-    },
-    'package.json': {
-      code: `{
-  "name": "viz-venture-group",
-  "version": "1.0.0",
-  "description": "Investment Platform",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "test": "php tests/test_routing.php"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.0"
-  },
-  "devDependencies": {
-    "vite": "^5.0.0",
-    "@vitejs/plugin-react": "^4.2.0"
+    );
   }
-}`,
-      language: 'javascript',
-    },
-  };
 
-  const example = codeExamples[fileName] || {
-    code: `// ${fileName}\n\n// File content will be loaded here...\n// This is a preview of the file structure.\n\n// Click "Run Tests" to execute Scout94 tests\n// and see real output in the chat!`,
-    language: 'javascript',
-  };
+  // Determine language for syntax highlighting
+  const language = tab.language || 
+    (fileName.endsWith('.php') ? 'php' 
+    : fileName.endsWith('.jsx') || fileName.endsWith('.js') ? 'javascript'
+    : fileName.endsWith('.css') ? 'css'
+    : fileName.endsWith('.json') ? 'json'
+    : fileName.endsWith('.py') ? 'python'
+    : fileName.endsWith('.rs') ? 'rust'
+    : fileName.endsWith('.tsx') ? 'typescript'
+    : fileName.endsWith('.html') ? 'html'
+    : fileName.endsWith('.sql') ? 'sql'
+    : fileName.endsWith('.sh') ? 'bash'
+    : 'text');
+
+  // Detect if file is minified (long lines, no formatting)
+  const isMinified = fileContent.split('\n').length < 5 && fileContent.length > 500;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative h-full">
-      {isRunning && (
-        <motion.div
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute top-4 right-4 px-3 py-1 bg-green-500 text-white text-xs rounded-full z-10"
-        >
-          ● TESTING
-        </motion.div>
+    <>
+      {isMinified && (
+        <div className="bg-amber-900/30 border-b border-amber-600/50 px-4 py-2 flex items-center gap-3 text-sm">
+          <span className="text-amber-400 text-lg">⚠️</span>
+          <div className="flex-1">
+            <div className="text-amber-200 font-medium">Minified/Bundled File</div>
+            <div className="text-amber-400/70 text-xs">
+              This file appears to be from build artifacts (dist/assets). Consider opening the source file for better readability.
+              <span className="text-gray-500 ml-2">
+                {fileContent.split('\n').length} lines • {(fileContent.length / 1024).toFixed(1)}KB
+              </span>
+            </div>
+          </div>
+        </div>
       )}
-      <SyntaxHighlighter
-        language={example.language}
-        style={atomOneDark}
-        showLineNumbers
-        wrapLines
-        customStyle={{
-          margin: 0,
-          padding: '1.5rem',
-          background: '#1e1e1e',
-          fontSize: '14px',
-          lineHeight: '1.6',
-          height: '100%',
-        }}
-        lineNumberStyle={{
-          minWidth: '3em',
-          paddingRight: '1em',
-          color: '#6b7280',
-          userSelect: 'none',
-        }}
+      <motion.div 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        className="h-full w-full overflow-auto"
+        style={{ position: 'relative' }}
       >
-        {example.code}
-      </SyntaxHighlighter>
-    </motion.div>
+        <SyntaxHighlighter
+          language={language}
+          style={atomOneDark}
+          showLineNumbers={true}
+          wrapLines={true}
+          wrapLongLines={true}
+          customStyle={{
+            margin: 0,
+            padding: '1.5rem 1.5rem 1.5rem 0',
+            minHeight: '100%',
+            fontSize: '14px',
+            lineHeight: '1.8',
+            fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
+            background: '#1e1e1e'
+          }}
+          lineNumberContainerStyle={{
+            float: 'left',
+            paddingRight: '0',
+            backgroundColor: '#0f1419',
+            borderRight: '2px solid #374151'
+          }}
+          lineNumberStyle={{
+            minWidth: '4em',
+            paddingRight: '1.5em',
+            paddingLeft: '1em',
+            color: '#9ca3af',
+            backgroundColor: '#0f1419',
+            userSelect: 'none',
+            textAlign: 'right',
+            fontSize: '13px',
+            fontWeight: '600',
+            letterSpacing: '0.5px'
+          }}
+          codeTagProps={{
+            style: {
+              paddingLeft: '1.5em',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word'
+            }
+          }}
+          PreTag="div"
+        >
+          {fileContent}
+        </SyntaxHighlighter>
+      </motion.div>
+    </>
   );
 }

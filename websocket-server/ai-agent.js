@@ -1001,30 +1001,22 @@ export async function handleAIConversation(message, mentionedAgent = null, testC
       console.log('   Problem:', problem.description);
       console.log('   Proposed:', solution.description);
       console.log('   Quality:', validation.quality);
-      console.log('   Warnings:', validation.warnings);
-      console.log('   Alternatives:', validation.alternatives);
-      console.log('   Reasoning:', validation.reasoning);
-      
-      // Return proper solution instead
-      const properSolution = ProperSolutionFramework.generateProperSolution(problem);
-      console.log('✅ Suggesting proper solution instead:');
-      console.log(JSON.stringify(properSolution, null, 2));
       
       return {
-        shouldProceed: false,
-        validation,
-        properSolution,
-        message: `I was about to take a lazy shortcut, but the decision framework caught it. Here's the proper approach: ${JSON.stringify(properSolution.steps.map(s => s.action))}`
+        approved: false,
+        quality: validation.quality,
+        reasoning: validation.reasoning,
+        properSolution: validation.properSolution
       };
     }
     
     return {
-      shouldProceed: true,
-      validation,
-      message: 'Solution quality validated - proceeding with proper implementation'
+      approved: true,
+      quality: 'GOOD',
+      reasoning: 'Solution follows proper problem-solving methodology'
     };
   }
-  
+
   /**
    * Get decision-making rules for context
    */

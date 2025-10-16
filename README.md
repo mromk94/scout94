@@ -237,35 +237,23 @@ Health Check → Retry Scout94 → Pass! ✅
 ### **Quick Start:**
 
 ```bash
-# Run Scout94 with self-healing
-php run_with_clinic.php "/path/to/project"
-```
+# Run# Scout94 
 
-### **Features:**
+**An Intelligent AI-Powered Testing Suite with Holistic Analysis & 7 Specialized Agents**
 
-✅ **Auto-Diagnosis** - Identifies why tests are failing  
-✅ **Health Scoring** - 5 metrics, weighted calculation  
-✅ **Treatment Generation** - Auto-creates missing tests  
-✅ **Risk Assessment** - Sandboxes new tests for safety  
-✅ **Healing Cycles** - Max 2 attempts to reach health ≥ 70  
-✅ **Always Delivers** - Report regardless of success  
-
-**See `CLINIC_GUIDE.md` for complete documentation.**
+Scout94 is a professional Tauri desktop application that brings together cutting-edge AI agents, real-time testing, and intelligent code analysis. Built with a philosophy of understanding before acting, Scout94 analyzes your entire project holistically, traces root causes, and provides actionable insights.
 
 ---
 
-### **When To Use Clinic vs Regular:**
+## Core Philosophy
 
-| Scenario | Use Mode |
-|----------|----------|
-| Scout94 consistently failing | 🏥 **Clinic** |
-| Want automatic improvements | 🏥 **Clinic** |
-| Trust automated test generation | 🏥 **Clinic** |
-| Quick baseline scan needed | 📊 **Regular** |
-| Manual control preferred | 📊 **Regular** |
-| Already passing most audits | 📊 **Regular** |
+Scout94 is built on key principles that guide every decision:
 
----
+- **Holistic Approach**: Understand the entire system before analyzing issues
+- **Root Cause Analysis**: Fix underlying problems, not just symptoms
+- **Intelligent Decision-Making**: Never take lazy shortcuts or delete without understanding
+- **Duplicate Intelligence**: Analyze both versions before making decisions
+- **Graceful Operations**: Clean startups, shutdowns, and no resource leaks
 
 ### **Audit Output:**
 
@@ -347,5 +335,63 @@ To add a new test to Scout94:
 
 ---
 
+## 🎨 IDE Improvements (October 16, 2025)
+
+Scout94's IDE interface has been enhanced with professional-grade features:
+
+### **Responsive Layout**
+- ✅ **Resizable panels**: User can drag to adjust IDE/Chat split width
+- ✅ **Resizable file explorer**: Adjustable sidebar width
+- ✅ **Line wrapping**: Code adapts to container width changes
+- ✅ **Window responsive**: Adapts to any screen size smoothly
+
+### **Professional Code Display**
+- ✅ **Prominent line numbering**: Bold, clear gutter with distinct background
+- ✅ **Protected line number lane**: Numbers stay in fixed column
+- ✅ **Syntax highlighting**: Full language support with proper wrapping
+- ✅ **Minified file detection**: Warns when viewing build artifacts
+
+### **Breadcrumb Navigation**
+- ✅ **Interactive path display**: Folder › Subfolder › File
+- ✅ **File type badges**: Language indicator (php, jsx, css, etc.)
+- ✅ **Hover effects**: Visual feedback on path segments
+- ✅ **Current file highlight**: Active file shown with blue pill badge
+
+### **Technical Implementation**
+- Uses SyntaxHighlighter's native capabilities (no library fighting)
+- Grid-based responsive panel layout
+- Proper line wrapping with `wrapLines={true}` and `wrapLongLines={true}`
+- Sticky line number gutter with visual separator
+
+---
+
+## 🎯 Accountability Protocol
+
+Scout94 now enforces a strict **Root Cause First** methodology across all AI agents.
+
+### **Documentation**
+See `websocket-server/ACCOUNTABILITY_PROTOCOL.md` for complete details.
+
+### **Key Principles**
+1. **STOP and investigate** before proposing solutions
+2. **Root cause analysis** required for every fix
+3. **Investigation evidence** must be provided
+4. **Holistic context** must be considered
+5. **No band-aids** - fix causes, not symptoms
+
+### **Enforcement**
+- All agents validate solutions through `DecisionValidator`
+- Solutions rejected if accountability checks fail
+- Fighting libraries = automatic rejection
+- Lazy shortcuts flagged and prevented
+
+### **Example: Line Numbering Fix**
+❌ **Wrong**: Try different CSS, force grid layout, fight the library  
+✅ **Right**: Investigate → Library has native props → Use `lineNumberContainerStyle` and `wrapLines`
+
+This ensures Scout94 maintains the same high standards across its entire ecosystem.
+
+---
+
 **Part of Scout94 Protocol**  
-Last Updated: October 15, 2025
+Last Updated: October 16, 2025

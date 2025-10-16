@@ -1,6 +1,16 @@
 /**
  * Decision Framework for AI Agents
  * Prevents lazy shortcuts and ensures proper problem-solving
+ * 
+ * USER'S CORE PRINCIPLE: INVESTIGATE ROOT CAUSE, NEVER GUESS SOLUTIONS
+ * 
+ * Workflow:
+ * 1. STOP AND ANALYZE FIRST - Don't jump to solutions
+ * 2. ROOT CAUSE INVESTIGATION - What is the ACTUAL problem?
+ * 3. HOLISTIC UNDERSTANDING - Consider entire system context
+ * 4. ANALYZE BEFORE ACTING - Understand WHY, not just THAT
+ * 5. IMPLEMENT PROPER SOLUTION - Fix root cause, not symptoms
+ * 6. NEVER guess, apply quick fixes, or treat symptoms
  */
 
 import { DuplicateAnalyzer, DuplicateResolver } from './duplicate-analyzer.js';
@@ -329,16 +339,38 @@ export const DECISION_RULES = {
   
   // When facing errors
   ERROR_RESPONSE: {
+    step0: 'STOP - Do not guess solutions, investigate first',
     step1: 'Understand what the error actually means',
     step2: 'Identify root cause (missing package, syntax, logic)',
     step3: 'Check if feature was requested by user',
     step4: 'Implement proper fix (install, correct, complete)',
     step5: 'Verify feature works as user intended',
     
+    accountability_requirements: [
+      'MUST provide root cause analysis',
+      'MUST show investigation evidence (files read, data checked)',
+      'MUST consider system context (how it fits in larger picture)',
+      'MUST verify not treating symptom (is this the actual problem?)',
+      'MUST validate solution doesn\'t create new issues'
+    ],
+    
+    investigation_questions: [
+      'What is the ACTUAL problem, not just the symptom?',
+      'What is the root cause, not the surface issue?',
+      'What context am I missing?',
+      'Have I verified my assumptions?',
+      'Am I treating a symptom or fixing the cause?',
+      'Am I fighting the library instead of using it properly?'
+    ],
+    
     avoid: [
+      'Guessing at solutions without investigation',
       'Deleting imports because "we\'re not using it yet"',
       'Commenting out code to make error go away',
-      'Removing features to avoid fixing the real problem'
+      'Removing features to avoid fixing the real problem',
+      'Applying band-aids instead of proper fixes',
+      'Fighting libraries instead of using them properly',
+      'Forcing custom layouts on library components'
     ]
   },
   
@@ -369,6 +401,9 @@ export const DECISION_RULES = {
     tools: 'Use DuplicateAnalyzer.analyzeDuplicates() before making decisions'
   }
 };
+
+// Re-export for named imports
+export { DuplicateAnalyzer, DuplicateResolver };
 
 export default {
   DecisionValidator,

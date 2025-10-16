@@ -21,10 +21,48 @@ export default function MissionControl() {
   const [currentReportPath, setCurrentReportPath] = useState(null);
   const [showProjectSelector, setShowProjectSelector] = useState(false);
   const chatInputRef = React.useRef(null);
+  
+  // Resizable panels state
+  const [idePaneWidth, setIdePaneWidth] = useState(50); // percentage
+  const [isDraggingDivider, setIsDraggingDivider] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('scout94_project_path', projectPath);
   }, [projectPath]);
+
+  // Handle panel resize
+  const handleDividerMouseDown = (e) => {
+    e.preventDefault();
+    setIsDraggingDivider(true);
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDraggingDivider && activeTab === 'split') {
+      const container = e.currentTarget;
+      const rect = container.getBoundingClientRect();
+      const newWidth = ((e.clientX - rect.left) / rect.width) * 100;
+      
+      // Constrain between 30% and 70%
+      if (newWidth >= 30 && newWidth <= 70) {
+        setIdePaneWidth(newWidth);
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDraggingDivider(false);
+  };
+
+  useEffect(() => {
+    if (isDraggingDivider) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDraggingDivider]);
 
   const handleProjectChange = (newPath) => {
     setProjectPath(newPath);
@@ -152,20 +190,34 @@ export default function MissionControl() {
       {!showProjectSelector && <AgentBar isRunning={isRunning} onAgentClick={handleAgentClick} />}
 
       {/* Main Content Area - Split or Single View */}
-      <div className="flex-1 flex overflow-hidden">
+      <div 
+        className="flex-1 flex overflow-hidden"
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        style={{ cursor: isDraggingDivider ? 'col-resize' : 'default' }}
+      >
         {(activeTab === 'ide' || activeTab === 'split') && (
-          <div className={activeTab === 'split' ? 'w-1/2 bg-slate-950/90 overflow-hidden' : 'w-full bg-slate-950/90 overflow-hidden'}>
+          <div 
+            className={activeTab === 'split' ? 'bg-slate-950/90 overflow-hidden' : 'w-full bg-slate-950/90 overflow-hidden'}
+            style={activeTab === 'split' ? { width: `${idePaneWidth}%`, minWidth: '300px' } : {}}
+          >
             <IDEPane isRunning={isRunning} messages={messages} projectPath={projectPath} />
           </div>
         )}
         
-        {/* THICK Vertical Divider Bar */}
+        {/* Resizable Divider Bar */}
         {activeTab === 'split' && (
-          <div className="w-1.5 flex-shrink-0 bg-gradient-to-b from-blue-600 via-purple-600 to-pink-600 shadow-2xl shadow-purple-500/50"></div>
+          <div 
+            className="w-1.5 flex-shrink-0 bg-gradient-to-b from-blue-600 via-purple-600 to-pink-600 shadow-2xl shadow-purple-500/50 hover:w-2 transition-all cursor-col-resize"
+            onMouseDown={handleDividerMouseDown}
+          />
         )}
         
         {(activeTab === 'chat' || activeTab === 'split') && (
-          <div className={activeTab === 'split' ? 'w-1/2 bg-indigo-950/90 overflow-hidden' : 'w-full bg-indigo-950/90 overflow-hidden'}>
+          <div 
+            className={activeTab === 'split' ? 'bg-indigo-950/90 overflow-hidden' : 'w-full bg-indigo-950/90 overflow-hidden'}
+            style={activeTab === 'split' ? { width: `${100 - idePaneWidth}%`, minWidth: '300px' } : {}}
+          >
             <ChatPane 
               ref={chatInputRef}
               isRunning={isRunning} 

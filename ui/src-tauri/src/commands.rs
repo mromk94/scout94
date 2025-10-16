@@ -1,5 +1,7 @@
 use std::process::Command;
 use std::fs;
+use std::fs::File;
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 
@@ -168,16 +170,51 @@ pub async fn read_directory_tree(directory_path: String, max_depth: Option<usize
     read_directory_recursive(&path, 0, max_depth)
 }
 
+fn is_minified_file(file_path: &Path) -> bool {
+    // Check if filename indicates minification
+    if let Some(name) = file_path.file_name() {
+        let name_str = name.to_string_lossy();
+        if name_str.ends_with(".min.js") || name_str.ends_with(".min.css") {
+            return true;
+        }
+    }
+    
+    // Check if it's a JS/JSX file that might be minified
+    if let Some(ext) = file_path.extension() {
+        let ext_str = ext.to_string_lossy();
+        if ext_str == "js" || ext_str == "jsx" {
+            // Read first 500 bytes to check if minified
+            if let Ok(mut file) = File::open(file_path) {
+                let mut buffer = vec![0; 500];
+                if let Ok(bytes_read) = file.read(&mut buffer) {
+                    if bytes_read > 100 {
+                        let content = String::from_utf8_lossy(&buffer[..bytes_read]);
+                        // Minified code has very long lines and no formatting
+                        let newline_count = content.chars().filter(|&c| c == '\n').count();
+                        // If less than 3 newlines in first 500 bytes, likely minified
+                        if newline_count < 3 {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    false
+}
+
 fn read_directory_recursive(path: &Path, current_depth: usize, max_depth: usize) -> Result<Vec<FileNode>, String> {
     if current_depth >= max_depth {
         return Ok(Vec::new());
     }
     
-    // Patterns to ignore
+    // Patterns to ignore (including build artifacts and minified code)
     let ignore_patterns = vec![
         "node_modules", ".git", ".next", ".vscode", "dist", "build", 
         "target", ".DS_Store", "vendor", ".idea", "__pycache__", 
-        ".cache", "coverage", ".env", ".venv", "venv"
+        ".cache", "coverage", ".env", ".venv", "venv",
+        "out", ".output", ".nuxt", ".vercel", ".netlify",
+        ".turbo", ".parcel-cache"
     ];
     
     let entries = match fs::read_dir(path) {
@@ -197,13 +234,19 @@ fn read_directory_recursive(path: &Path, current_depth: usize, max_depth: usize)
                 continue;
             }
             
+            let entry_path = entry.path();
+            
+            // Skip minified files
+            if !entry_path.is_dir() && is_minified_file(&entry_path) {
+                continue;
+            }
+            
             // Skip hidden files (starting with .)
             if name.starts_with('.') && name != "." && name != ".." {
                 continue;
             }
             
-            let path = entry.path();
-            let path_str = path.to_string_lossy().to_string();
+            let path_str = entry_path.to_string_lossy().to_string();
             
             let metadata = match entry.metadata() {
                 Ok(m) => m,
@@ -219,7 +262,7 @@ fn read_directory_recursive(path: &Path, current_depth: usize, max_depth: usize)
             };
             
             let children = if is_directory {
-                match read_directory_recursive(&path, current_depth + 1, max_depth) {
+                match read_directory_recursive(&entry_path, current_depth + 1, max_depth) {
                     Ok(children) => {
                         if children.is_empty() {
                             None
