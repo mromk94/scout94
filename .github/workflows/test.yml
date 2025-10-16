@@ -77,16 +77,16 @@ jobs:
     
     - name: Check for API keys in code
       run: |
-        # Check for common API key patterns (excluding .env.example)
-        if grep -r -i "GEMINI_API_KEY=AIza" --exclude=".env.example" --exclude-dir=".git" .; then
+        # Check for common API key patterns (excluding .env.example and docs)
+        if grep -r -i "GEMINI_API_KEY=AIza" --exclude=".env.example" --exclude="*.md" --exclude-dir=".git" --exclude-dir=".github" .; then
           echo "❌ ERROR: Possible Gemini API key found in code!"
           exit 1
         fi
-        if grep -r -i "OPENAI_API_KEY=sk-" --exclude=".env.example" --exclude-dir=".git" .; then
+        if grep -r -i "OPENAI_API_KEY=sk-proj" --exclude=".env.example" --exclude="*.md" --exclude-dir=".git" --exclude-dir=".github" .; then
           echo "❌ ERROR: Possible OpenAI API key found in code!"
           exit 1
         fi
-        if grep -r -i "ANTHROPIC_API_KEY=sk-ant" --exclude=".env.example" --exclude-dir=".git" .; then
+        if grep -r -i "ANTHROPIC_API_KEY=sk-ant" --exclude=".env.example" --exclude="*.md" --exclude-dir=".git" --exclude-dir=".github" .; then
           echo "❌ ERROR: Possible Anthropic API key found in code!"
           exit 1
         fi

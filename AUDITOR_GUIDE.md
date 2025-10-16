@@ -96,7 +96,7 @@ cd /Users/mac/CascadeProjects/scout94
 cp .env.example .env
 
 # 3. Add your key
-echo "OPENAI_API_KEY=sk-proj-..." > .env
+echo "OPENAI_API_KEY=your-openai-key-here" > .env
 
 # 4. Test it
 php run_with_audit.php "/path/to/project"
@@ -116,7 +116,7 @@ cd /Users/mac/CascadeProjects/scout94
 cp .env.example .env
 
 # 3. Add your key
-echo "GEMINI_API_KEY=AIza..." > .env
+echo "GEMINI_API_KEY=your-gemini-key-here" > .env
 
 # 4. Test it
 php run_with_audit.php "/path/to/project"
