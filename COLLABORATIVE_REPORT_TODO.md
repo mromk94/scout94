@@ -590,6 +590,29 @@ npm install async-lock  # Lock implementation alternative
 
 ---
 
+## 🔄 PHASE 4: MOCK DETECTION INTEGRATION - 🔄 IN PROGRESS
+
+### **Objective**
+Integrate mock detection into collaborative reporting so all agents and users know when data is real vs. placeholder.
+
+**See:** `MOCK_DETECTION_PROTOCOL.md` for complete specification
+
+### **Tasks Overview**
+1. **PHP Mock Detection Wrapper** - Allow PHP to detect mock patterns
+2. **Scout94 Summary with Authenticity** - Add badges to reports
+3. **Test Flow Integration** - Run detection after Scout94 tests
+4. **Auditor Considers Authenticity** - Factor into scoring
+5. **Report Header Badges** - Visual indicators
+
+### **Status**
+- Core detection engine: ✅ Complete (`mock-detector.js`)
+- Comprehensive scan integration: ✅ Complete
+- Markdown report integration: ✅ Complete
+- PHP integration: 📋 Planned (Phase 4 tasks)
+- Collaborative report integration: 📋 Planned
+
+---
+
 ## 📝 NOTES
 
 - Use atomic file writes (`writeFileSync` with temp file + rename)
