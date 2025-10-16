@@ -39,9 +39,9 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
   // ============================================
   markdown += `# 🔍 Scout94 Comprehensive Analysis Report\n\n`;
   markdown += `**Generated:** ${timestamp}  \n`;
-  markdown += `**Project:** ${results.projectPath}  \n`;
-  markdown += `**Architecture:** ${projectMap.architecture}  \n`;
-  markdown += `**Frameworks:** ${projectMap.frameworks.join(', ')}  \n\n`;
+  markdown += `**Project:** ${results.projectPath || 'Unknown'}  \n`;
+  markdown += `**Architecture:** ${projectMap?.architecture || 'Unknown'}  \n`;
+  markdown += `**Frameworks:** ${(projectMap?.frameworks || []).join(', ') || 'None detected'}  \n\n`;
   
   markdown += `---\n\n`;
   
@@ -102,9 +102,9 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
       
       if (rc.impact) {
         markdown += `#### 💥 Impact Assessment\n\n`;
-        markdown += `- **Scope:** ${rc.impact.scope}\n`;
-        markdown += `- **Affected Features:** ${rc.impact.affectedFeatures.join(', ')}\n`;
-        markdown += `- **Cascade Risk:** ${rc.impact.cascadeRisk}\n\n`;
+        markdown += `- **Scope:** ${rc.impact.scope || 'Unknown'}\n`;
+        markdown += `- **Affected Features:** ${(rc.impact.affectedFeatures || []).join(', ') || 'None'}\n`;
+        markdown += `- **Cascade Risk:** ${rc.impact.cascadeRisk || 'UNKNOWN'}\n\n`;
       }
       
       markdown += `#### ✅ Recommended Solutions\n\n`;
@@ -135,18 +135,18 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
   // PROJECT ARCHITECTURE OVERVIEW
   // ============================================
   markdown += `## 🏗️ Project Architecture\n\n`;
-  markdown += `**Pattern:** ${projectMap.architecture}\n\n`;
+  markdown += `**Pattern:** ${projectMap?.architecture || 'Unknown'}\n\n`;
   
   markdown += `### 📁 Directory Structure\n\n`;
   markdown += `\`\`\`\n`;
-  markdown += formatStructure(projectMap.structure, 0);
+  markdown += projectMap?.structure ? formatStructure(projectMap.structure, 0) : 'Structure not analyzed\n';
   markdown += `\`\`\`\n\n`;
   
   markdown += `### 🔄 Data Flow\n\n`;
-  if (projectMap.dataFlow.length > 0) {
+  if (projectMap?.dataFlow?.length > 0) {
     projectMap.dataFlow.forEach(flow => {
-      markdown += `- **${flow.name}**\n`;
-      markdown += `  \`${flow.components.join(' → ')}\`\n`;
+      markdown += `- **${flow.name || 'Unnamed Flow'}**\n`;
+      markdown += `  \`${(flow.components || []).join(' → ')}\`\n`;
     });
   } else {
     markdown += `No clear data flow patterns detected.\n`;
@@ -159,29 +159,27 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
   markdown += `## 📋 Detailed Issue Breakdown\n\n`;
   
   // Security Issues
-  if (scanResults.securityIssues > 0) {
-    markdown += `### 🔒 Security Vulnerabilities (${scanResults.securityIssues})\n\n`;
-    markdown += `**Risk Level:** ${scanResults.securityIssues > 10 ? 'HIGH 🔴' : scanResults.securityIssues > 3 ? 'MEDIUM 🟡' : 'LOW 🟢'}\n\n`;
+  if (safeSecurityIssues > 0) {
+    markdown += `### 🔒 Security Vulnerabilities (${safeSecurityIssues})\n\n`;
+    markdown += `**Risk Level:** ${safeSecurityIssues > 10 ? 'HIGH 🔴' : safeSecurityIssues > 3 ? 'MEDIUM 🟡' : 'LOW 🟢'}\n\n`;
     markdown += `Common vulnerability types to check:\n`;
     markdown += `- SQL Injection (parameterize queries)\n`;
     markdown += `- XSS (escape output)\n`;
-    markdown += `- CSRF (implement tokens)\n`;
-    markdown += `- Hardcoded credentials (use environment variables)\n\n`;
+    markdown += `- CSRF (use tokens)\n\n`;
   }
   
   // Performance Issues
-  if (scanResults.performanceIssues > 0) {
-    markdown += `### ⚡ Performance Issues (${scanResults.performanceIssues})\n\n`;
+  if (safePerformanceIssues > 0) {
+    markdown += `### ⚡ Performance Issues (${safePerformanceIssues})\n\n`;
     markdown += `Focus areas:\n`;
     markdown += `- N+1 query problems\n`;
     markdown += `- Missing database indexes\n`;
-    markdown += `- Unoptimized loops\n`;
-    markdown += `- Memory leaks\n\n`;
+    markdown += `- Unoptimized queries\n\n`;
   }
   
   // Code Quality
-  if (scanResults.qualityIssues > 0) {
-    markdown += `### 🎨 Code Quality Issues (${scanResults.qualityIssues})\n\n`;
+  if (safeQualityIssues > 0) {
+    markdown += `### 🎨 Code Quality Issues (${safeQualityIssues})\n\n`;
     markdown += `Maintainability concerns:\n`;
     markdown += `- Long functions (> 50 lines)\n`;
     markdown += `- Deep nesting (> 4 levels)\n`;
