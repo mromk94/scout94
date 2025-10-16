@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Save, RotateCcw, Search, Settings as SettingsIcon,
   Wrench, Bot, Beaker, Scan, Brain, FileText, Shield, 
-  Palette, Database, Network, Sliders, SearchIcon
+  Palette, Database, Network, Sliders, SearchIcon, Container
 } from 'lucide-react';
 import configManager from '../../utils/configManager';
 
@@ -33,11 +33,13 @@ import StorageSettings from './sections/StorageSettings';
 import CommunicationSettings from './sections/CommunicationSettings';
 import AdvancedSettings from './sections/AdvancedSettings';
 import SearchSettings from './sections/SearchSettings';
+import TestEnvironmentSettings from './sections/TestEnvironmentSettings';
 
 const SECTIONS = [
   { id: 'general', label: 'General', icon: Wrench },
   { id: 'agents', label: 'Agents', icon: Bot },
   { id: 'testing', label: 'Testing', icon: Beaker },
+  { id: 'testenv', label: 'Test Environment', icon: Container },
   { id: 'analysis', label: 'Analysis', icon: Scan },
   { id: 'llm', label: 'LLMs', icon: Brain },
   { id: 'reporting', label: 'Reports', icon: FileText },
@@ -123,6 +125,8 @@ export default function SettingsModal({ isOpen, onClose }) {
         return <AgentSettings config={config} onChange={handleConfigChange} />;
       case 'testing':
         return <TestingSettings config={config} onChange={handleConfigChange} />;
+      case 'testenv':
+        return <TestEnvironmentSettings config={config} onChange={handleConfigChange} />;
       case 'analysis':
         return <AnalysisSettings config={config} onChange={handleConfigChange} />;
       case 'llm':
