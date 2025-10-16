@@ -5,6 +5,7 @@
 
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
+import { MockDetector } from './mock-detector.js';
 
 /**
  * Generate Comprehensive Markdown Report
@@ -61,6 +62,14 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
   }
   
   markdown += `---\n\n`;
+  
+  // ============================================
+  // MOCK DETECTION SECTION
+  // ============================================
+  if (results.mockDetection) {
+    const detector = new MockDetector();
+    markdown += detector.generateReportSection(results.mockDetection);
+  }
   
   // ============================================
   // ROOT CAUSE ANALYSIS

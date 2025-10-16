@@ -13,6 +13,7 @@ import * as DeepAnalysis from './deep-analysis.js';
 import * as HolisticAnalyzer from './holistic-analyzer.js';
 import * as RootCauseTracer from './root-cause-tracer.js';
 import * as MarkdownReportGenerator from './markdown-report-generator.js';
+import { MockDetector, detectMockData } from './mock-detector.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -97,6 +98,45 @@ export async function handleComprehensiveScan(ws, broadcast) {
       type: 'message',
       agent: 'scout94',
       text: `🔬 Root cause analysis complete!\n- ${rootCauseAnalysis.rootCauses.length} root causes identified\n- Cascade risk: ${rootCauseAnalysis.impactAnalysis.cascadeRisk}`,
+      timestamp: new Date().toISOString()
+    });
+    
+    // MOCK DETECTION - Check data authenticity
+    broadcast({
+      type: 'message',
+      agent: 'scout94',
+      text: '🔍 **Analyzing data authenticity...**\n\nChecking for mock/placeholder patterns...',
+      contentType: 'markdown',
+      timestamp: new Date().toISOString()
+    });
+    
+    const mockDetection = detectMockData(results);
+    results.mockDetection = mockDetection;
+    
+    // Report mock detection findings
+    let mockMsg = `## 🔍 Data Authenticity Report\n\n`;
+    mockMsg += `**Confidence:** ${mockDetection.confidence}% ${mockDetection.verdict.emoji}\n`;
+    mockMsg += `**Status:** ${mockDetection.verdict.status}\n`;
+    mockMsg += `**Assessment:** ${mockDetection.verdict.message}\n\n`;
+    
+    if (mockDetection.indicators.length > 0) {
+      mockMsg += `### ⚠️ Issues Detected (${mockDetection.indicators.length})\n\n`;
+      mockDetection.indicators.slice(0, 5).forEach((indicator, idx) => {
+        mockMsg += `${idx + 1}. **${indicator.type}**: ${indicator.description}\n`;
+      });
+      if (mockDetection.indicators.length > 5) {
+        mockMsg += `\n_+ ${mockDetection.indicators.length - 5} more issues (see full report)_\n`;
+      }
+    } else {
+      mockMsg += `✅ All scan data appears authentic and complete!\n`;
+    }
+    
+    broadcast({
+      type: 'message',
+      agent: 'scout94',
+      text: mockMsg,
+      contentType: 'markdown',
+      messageType: mockDetection.isMock ? 'error' : (mockDetection.isPartiallyMock ? 'warning' : 'success'),
       timestamp: new Date().toISOString()
     });
     
