@@ -119,7 +119,19 @@ while ($attempt <= $maxRetries) {
     // ============================================
     // PHASE 2: AUDITOR VALIDATION
     // ============================================
-    sendToChat('auditor', "📊 **Receiving test results for audit...**\n\nAnalyzing test completeness, methodology, and coverage...", 'markdown');
+    sendToChat('auditor', "📊 **Auditor Evaluation Starting...**\n\nAnalyzing Scout94's test results with LLM...", 'markdown');
+    
+    // Secretary: Post audit start
+    $auditorSecretary->auditStarted('Gemini 1.5 Pro');
+    
+    // Post evaluation criteria being checked
+    $auditorSecretary->evaluatingCriteria('Test Completeness');
+    usleep(200000);
+    $auditorSecretary->evaluatingCriteria('Methodology Quality');
+    usleep(200000);
+    $auditorSecretary->evaluatingCriteria('Coverage Analysis');
+    usleep(200000);
+    $auditorSecretary->evaluatingCriteria('Quality Indicators');
     
     $auditor = new Scout94Auditor($projectPath);
     $audit = $auditor->audit($testOutputString);
