@@ -187,6 +187,89 @@ export function generateMarkdownReport(projectMap, rootCauseAnalysis, results) {
     markdown += `- Magic numbers\n\n`;
   }
   
+  // ============================================
+  // DUPLICATE FILES
+  // ============================================
+  if (results.duplicateFiles && results.duplicateFiles.summary && results.duplicateFiles.summary.totalIssues > 0) {
+    const dupeData = results.duplicateFiles;
+    markdown += `## 🔄 Code Duplication Analysis\n\n`;
+    markdown += `**Summary:** Found ${dupeData.summary.exactDuplicateGroups} groups of exact duplicates and ${dupeData.summary.similarNameGroups} similar naming patterns.\n\n`;
+    
+    if (dupeData.summary.wastedSpaceKB > 0) {
+      markdown += `**Wasted Space:** ${dupeData.summary.wastedSpaceKB} KB from ${dupeData.summary.totalDuplicateFiles} duplicate files\n\n`;
+    }
+    
+    // Show similar name groups (more actionable)
+    if (dupeData.similarNames && dupeData.similarNames.length > 0) {
+      markdown += `### Similar File Names (Likely Duplicates)\n\n`;
+      dupeData.similarNames.forEach((group, idx) => {
+        markdown += `${idx + 1}. **${group.pattern}** pattern (${group.count} files in \`${group.directory}\`)\n`;
+        group.files.forEach(file => {
+          markdown += `   - \`${file}\`\n`;
+        });
+        markdown += `\n`;
+      });
+    }
+    
+    // Show recommendations
+    if (dupeData.recommendations && dupeData.recommendations.length > 0) {
+      markdown += `### Recommended Actions\n\n`;
+      dupeData.recommendations.forEach((rec, idx) => {
+        const icon = rec.priority === 'HIGH' ? '🔴' : rec.priority === 'MEDIUM' ? '🟡' : '🟢';
+        markdown += `${icon} **${rec.type}**: ${rec.message}\n`;
+        markdown += `   - Action: ${rec.action}\n\n`;
+      });
+    }
+    
+    markdown += `---\n\n`;
+  }
+  
+  // ============================================
+  // DEVELOPMENT ARTIFACTS
+  // ============================================
+  if (results.developmentArtifacts && results.developmentArtifacts.summary && results.developmentArtifacts.summary.total > 0) {
+    const artifactData = results.developmentArtifacts;
+    markdown += `## 🛠️ Development Artifacts Found\n\n`;
+    
+    const riskIcon = artifactData.summary.risk === 'CRITICAL' ? '🔴' : 
+                    artifactData.summary.risk === 'HIGH' ? '🟡' : '🟢';
+    markdown += `**Risk Level:** ${riskIcon} ${artifactData.summary.risk}\n`;
+    markdown += `**Total Artifacts:** ${artifactData.summary.total}\n\n`;
+    
+    // Show by severity
+    if (artifactData.summary.bySeverity) {
+      markdown += `### By Severity\n\n`;
+      markdown += `| Severity | Count |\n`;
+      markdown += `|----------|-------|\n`;
+      Object.entries(artifactData.summary.bySeverity).forEach(([severity, count]) => {
+        if (count > 0) {
+          markdown += `| ${severity} | ${count} |\n`;
+        }
+      });
+      markdown += `\n`;
+    }
+    
+    // Show recommendations
+    if (artifactData.recommendations && artifactData.recommendations.length > 0) {
+      markdown += `### Cleanup Recommendations\n\n`;
+      artifactData.recommendations.forEach((rec, idx) => {
+        const icon = rec.priority === 'CRITICAL' ? '🔴' : 
+                    rec.priority === 'HIGH' ? '🟡' : '🟢';
+        markdown += `${icon} **${rec.type}**: ${rec.message}\n`;
+        markdown += `   - ${rec.action}\n`;
+        if (rec.files && rec.files.length > 0) {
+          markdown += `   - Affected files: ${Math.min(rec.files.length, 5)} (showing first few)\n`;
+          rec.files.slice(0, 3).forEach(file => {
+            markdown += `     - \`${file}\`\n`;
+          });
+        }
+        markdown += `\n`;
+      });
+    }
+    
+    markdown += `---\n\n`;
+  }
+  
   markdown += `---\n\n`;
   
   // ============================================

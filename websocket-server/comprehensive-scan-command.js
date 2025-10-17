@@ -17,6 +17,8 @@ import { MockDetector, detectMockData } from './mock-detector.js';
 import containerizedTestRunner from './containerized-test-runner.js';
 import configLoader from './config-loader.js';
 import { UniversalTestRunner } from './universal-test-runner.js';
+import { DuplicateFileDetector } from './duplicate-file-detector.js';
+import { ArtifactDetector } from './artifact-detector.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -129,6 +131,62 @@ export async function handleComprehensiveScan(ws, broadcast) {
     } catch (error) {
       console.error('Universal testing error:', error);
       results.universalTests = { error: error.message };
+    }
+    
+    // PHASE 2.4.1: Duplicate File Detection
+    try {
+      broadcast({
+        type: 'message',
+        agent: 'scout94',
+        text: '🔍 Detecting duplicate files...',
+        timestamp: new Date().toISOString()
+      });
+      
+      const duplicateDetector = new DuplicateFileDetector(PROJECT_PATH);
+      duplicateDetector.findDuplicates(PROJECT_PATH);
+      duplicateDetector.findSimilarNames(PROJECT_PATH);
+      const duplicateReport = duplicateDetector.generateReport();
+      results.duplicateFiles = duplicateReport;
+      
+      if (duplicateReport.summary.totalIssues > 0) {
+        broadcast({
+          type: 'message',
+          agent: 'scout94',
+          text: `📋 Found ${duplicateReport.summary.exactDuplicateGroups} exact duplicates and ${duplicateReport.summary.similarNameGroups} similar name patterns`,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('Duplicate detection error:', error);
+      results.duplicateFiles = { error: error.message };
+    }
+    
+    // PHASE 2.4.2: Development Artifact Detection
+    try {
+      broadcast({
+        type: 'message',
+        agent: 'scout94',
+        text: '🔍 Scanning for development artifacts...',
+        timestamp: new Date().toISOString()
+      });
+      
+      const artifactDetector = new ArtifactDetector(PROJECT_PATH);
+      const artifactReport = artifactDetector.detectArtifacts();
+      results.developmentArtifacts = artifactReport;
+      
+      if (artifactReport.summary.total > 0) {
+        const riskIcon = artifactReport.summary.risk === 'CRITICAL' ? '🔴' : 
+                        artifactReport.summary.risk === 'HIGH' ? '🟡' : '🟢';
+        broadcast({
+          type: 'message',
+          agent: 'scout94',
+          text: `${riskIcon} Found ${artifactReport.summary.total} development artifacts (Risk: ${artifactReport.summary.risk})`,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('Artifact detection error:', error);
+      results.developmentArtifacts = { error: error.message };
     }
     
     // PHASE 2.5: Containerized Testing (if enabled)
